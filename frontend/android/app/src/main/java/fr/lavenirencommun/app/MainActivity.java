@@ -1,4 +1,4 @@
-﻿package fr.lavenirencommun.app;
+package fr.lavenirencommun.app;
 
 import com.getcapacitor.BridgeActivity;
 
