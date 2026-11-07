@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { Budget } from '../types/programme';
+﻿import { useState } from 'react';
+import type { Budget } from '../types/programme';
 import { IconChevronDown } from './Icons';
 
 interface BudgetViewProps {

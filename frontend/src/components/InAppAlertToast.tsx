@@ -1,5 +1,4 @@
-﻿import React from 'react';
-import { Section } from '../types/programme';
+﻿import type { Section } from '../types/programme';
 import { IconBell, IconClose, IconChevronRight } from './Icons';
 
 interface InAppAlertToastProps {

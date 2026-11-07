@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { Plan } from '../types/programme';
+﻿import { useState } from 'react';
+import type { Plan } from '../types/programme';
 import { IconChevronDown } from './Icons';
 
 interface PlansViewProps {

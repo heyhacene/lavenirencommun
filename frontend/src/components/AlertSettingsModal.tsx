@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { Section, Profile, AlertConfig } from '../types/programme';
+﻿import { useState } from 'react';
+import type { Section, Profile, AlertConfig } from '../types/programme';
 import {
   scheduleDailyFicheAlert,
   triggerTestNotification,

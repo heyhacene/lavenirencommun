@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
-import { ProgrammeData, Section, AlertConfig } from './types/programme';
+﻿import { useState, useEffect, useMemo } from 'react';
+import type { ProgrammeData, Section, AlertConfig } from './types/programme';
 import { loadAlertConfig, scheduleDailyFicheAlert } from './services/notifications';
 import { CardFiche } from './components/CardFiche';
 import { ModalFicheIntegrale } from './components/ModalFicheIntegrale';

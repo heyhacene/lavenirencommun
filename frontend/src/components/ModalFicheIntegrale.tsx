@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { Section, Profile } from '../types/programme';
+﻿import { useState } from 'react';
+import type { Section, Profile } from '../types/programme';
 import { IconClose, IconCheck, IconShare, IconBell, renderProfileIcon } from './Icons';
 
 interface ModalFicheIntegraleProps {

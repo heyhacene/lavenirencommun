@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { ProgrammeData, Section } from '../types/programme';
+﻿import { useState } from 'react';
+import type { ProgrammeData, Section } from '../types/programme';
 import { IconChevronRight, IconClose } from './Icons';
 
 interface ReaderViewProps {

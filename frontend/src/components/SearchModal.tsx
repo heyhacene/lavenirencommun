@@ -1,5 +1,5 @@
-﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Section, Profile } from '../types/programme';
+﻿import { useState, useMemo, useRef, useEffect } from 'react';
+import type { Section, Profile } from '../types/programme';
 import { IconSearch, IconClose, IconChevronRight, renderProfileIcon } from './Icons';
 
 interface SearchModalProps {

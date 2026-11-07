@@ -1,5 +1,4 @@
-﻿import React from 'react';
-import { Section, Profile } from '../types/programme';
+﻿import type { Section, Profile } from '../types/programme';
 import { IconChevronRight, renderProfileIcon } from './Icons';
 
 interface CardFicheProps {

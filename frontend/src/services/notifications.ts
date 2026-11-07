@@ -1,5 +1,5 @@
 ﻿import { LocalNotifications } from '@capacitor/local-notifications';
-import { AlertConfig, Section } from '../types/programme';
+import type { AlertConfig, Section } from '../types/programme';
 
 const STORAGE_KEY_ALERT = 'aec_alert_config_v1';
 const NOTIFICATION_ID = 422027;
