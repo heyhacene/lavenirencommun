@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { ProgrammeData, Section } from '../types/programme';
 import { IconChevronRight, IconClose, IconStar } from './Icons';
 
@@ -34,7 +34,7 @@ export const ReaderView = ({ data, onOpenSectionModal }: ReaderViewProps) => {
           className="flex items-center gap-2 font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-1.5 rounded-xl shadow-md transition-all active:scale-95"
         >
           <span>📑 Sommaire du livre</span>
-          <IconChevronRight className={`w-3.5 h-3.5 transition-transform ${showToc ? 'rotate-90' : ''}`} />
+          <IconChevronRight size={14} className={`transition-transform ${showToc ? 'rotate-90' : ''}`} />
         </button>
 
         <div className="flex items-center gap-1 bg-[#100322] p-1 rounded-xl border border-purple-900/50">
@@ -61,12 +61,12 @@ export const ReaderView = ({ data, onOpenSectionModal }: ReaderViewProps) => {
 
       {/* Sommaire Modal / Drawer */}
       {showToc && (
-        <div className="fixed inset-0 z-40 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-40 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#140626] border border-purple-500/40 rounded-3xl w-full max-w-lg max-h-[82vh] flex flex-col overflow-hidden shadow-2xl">
             <div className="p-4 border-b border-purple-500/20 flex items-center justify-between bg-gradient-to-r from-purple-950 to-[#1d0638]">
               <h3 className="font-black text-sm text-white">Sommaire de L'Avenir en commun</h3>
               <button onClick={() => setShowToc(false)} className="text-purple-300 hover:text-white">
-                <IconClose className="w-5 h-5" />
+                <IconClose size={20} />
               </button>
             </div>
             <div className="overflow-y-auto p-4 space-y-3">
@@ -103,7 +103,7 @@ export const ReaderView = ({ data, onOpenSectionModal }: ReaderViewProps) => {
       )}
 
       {/* Book Presentation Cover Hero */}
-      <div className="relative overflow-hidden glass-panel rounded-3xl p-6 sm:p-10 border border-purple-500/30 shadow-2xl mb-8 text-center">
+      <div className="relative overflow-hidden stitch-card rounded-3xl p-6 sm:p-10 border border-purple-500/30 shadow-2xl mb-8 text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <img
@@ -118,148 +118,126 @@ export const ReaderView = ({ data, onOpenSectionModal }: ReaderViewProps) => {
             Le programme de gouvernement de la Nouvelle France
           </p>
           <p className="text-xs text-slate-400 mt-2 font-medium">
-            Jean-Luc Mélenchon &bull; Coordination : Clémence Guetté &amp; Hadrien Clouet
+            Par <strong>Jean-Luc Mélenchon</strong> &bull; Coordination : <strong>Clémence Guetté &amp; Hadrien Clouet</strong>
           </p>
-          <div className="flex flex-wrap justify-center gap-2 mt-5 text-[11px] font-bold">
-            <span className="bg-purple-950/80 border border-purple-500/30 text-purple-200 px-3 py-1 rounded-full">6 Parties</span>
-            <span className="bg-purple-950/80 border border-purple-500/30 text-purple-200 px-3 py-1 rounded-full">23 Chapitres</span>
-            <span className="bg-purple-950/80 border border-purple-500/30 text-purple-200 px-3 py-1 rounded-full">111 Fiches</span>
-            <span className="bg-purple-950/80 border border-purple-500/30 text-amber-300 px-3 py-1 rounded-full">1 069 Mesures</span>
+          <div className="inline-block mt-4 px-4 py-1.5 rounded-full bg-purple-950/80 border border-purple-500/30 text-xs font-bold text-purple-200">
+            Édition Officielle 2026-2027 &bull; Élection présidentielle 2027
           </div>
         </div>
       </div>
 
-      {/* Introduction */}
-      <section id="reader-intro" className="glass-panel rounded-3xl p-6 sm:p-8 border border-purple-500/30 shadow-xl mb-8">
-        <span className="text-xs font-black text-amber-300 uppercase tracking-wider block mb-1">
-          Préface &bull; Jean-Luc Mélenchon
-        </span>
-        <h2 className="text-xl sm:text-2xl font-black text-white mb-6">
-          {data.introduction.title}
+      {/* Reader Intro Content */}
+      <section id="reader-intro" className="stitch-card rounded-3xl p-6 sm:p-8 border border-purple-500/20 shadow-xl mb-8 space-y-4">
+        <h2 className="text-xl font-black text-white tracking-tight border-b border-purple-500/20 pb-3">
+          {data.preface.title}
         </h2>
-
-        {data.introduction.preamble.length > 0 && (
-          <div className={`space-y-4 text-slate-200 mb-8 italic border-l-2 border-purple-500/50 pl-4 ${textSizeClasses[fontSize]}`}>
-            {data.introduction.preamble.map((para, i) => (
-              <p key={i}>« {para} »</p>
-            ))}
-          </div>
-        )}
-
-        <div className="space-y-8">
-          {data.introduction.sections.map((sec, idx) => (
-            <div key={idx} className="border-t border-purple-900/50 pt-6">
-              <h3 className="text-lg font-black text-purple-200 mb-3">
-                {sec.title}
-              </h3>
-              <div className={`space-y-3.5 text-slate-300 ${textSizeClasses[fontSize]}`}>
-                {sec.paragraphs.map((p, pIdx) => (
-                  <p key={pIdx}>{p}</p>
-                ))}
-              </div>
-            </div>
+        <div className="space-y-3.5 text-slate-200 leading-relaxed text-sm sm:text-base font-normal">
+          {data.preface.paragraphs.map((p, i) => (
+            <p key={i}>{p}</p>
           ))}
+        </div>
+        <div className="text-right pt-2 font-bold text-amber-300 text-sm">
+          — {data.preface.author}
         </div>
       </section>
 
-      {/* Continuous Parties & Chapters */}
-      {data.parties.map(partie => (
-        <section key={partie.id} id={`reader-${partie.id}`} className="mb-10">
-          {/* Party Banner */}
-          <div className="bg-gradient-to-r from-purple-900 via-[#27074d] to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-purple-500/30 mb-6">
-            <span className="text-xs font-black uppercase tracking-widest text-amber-300">
-              Partie {partie.number}
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black mt-1.5 leading-snug">
-              {partie.title}
-            </h2>
-            {partie.presentation.length > 0 && (
-              <div className="mt-4 space-y-2 text-xs sm:text-sm text-purple-200 leading-relaxed font-normal border-t border-purple-800/60 pt-4">
-                {partie.presentation.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-            )}
-          </div>
+      {/* Parties & Chapters Continuous Flow */}
+      <div className="space-y-12">
+        {data.parties.map(p => (
+          <section key={p.id} id={`reader-${p.id}`} className="space-y-6">
+            {/* Party Header Banner */}
+            <div className="bg-gradient-to-r from-purple-950 via-[#1e0741] to-[#120025] border-l-4 border-purple-400 p-6 rounded-2xl shadow-xl">
+              <span className="text-xs font-black uppercase tracking-widest text-amber-400 block mb-1">
+                Grande Partie {p.number}
+              </span>
+              <h2 className="text-2xl font-black text-white leading-tight">
+                {p.title}
+              </h2>
+            </div>
 
-          {/* Chapters */}
-          <div className="space-y-8">
-            {partie.chapters.map(chap => (
-              <div
-                key={chap.id}
-                id={`reader-${chap.id}`}
-                className="glass-panel rounded-3xl p-6 sm:p-8 border border-purple-500/20 shadow-md"
-              >
-                <div className="border-b border-purple-900/50 pb-4 mb-6">
-                  <span className="text-xs font-black text-amber-300 uppercase tracking-wider block mb-1">
-                    Chapitre {chap.number}
-                  </span>
-                  <h3 className="text-lg sm:text-xl font-black text-white">
-                    {chap.title}
-                  </h3>
-                </div>
+            {/* Chapters inside Party */}
+            <div className="space-y-8 pl-1 sm:pl-3">
+              {p.chapters.map(c => (
+                <div key={c.id} id={`reader-${c.id}`} className="space-y-4">
+                  <div className="border-b border-purple-500/20 pb-2">
+                    <span className="text-[11px] font-bold text-purple-400 uppercase tracking-wider block">
+                      Chapitre {c.number}
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-extrabold text-white">
+                      {c.title}
+                    </h3>
+                  </div>
 
-                {/* Chapter Sections */}
-                <div className="space-y-8 divide-y divide-purple-900/30">
-                  {chap.sections.map((sec, sIdx) => (
-                    <div key={sec.id} className={sIdx > 0 ? "pt-6" : ""}>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="text-xs font-black text-purple-200 bg-purple-900/70 border border-purple-500/40 px-2.5 py-0.5 rounded-full">
-                          Fiche #{sec.globalIndex}
-                        </span>
-                        <button
-                          onClick={() => onOpenSectionModal(sec)}
-                          className="text-xs font-bold text-amber-300 hover:text-white"
-                        >
-                          Fiche complète &rarr;
-                        </button>
-                      </div>
-
-                      <h4 className="text-base font-extrabold text-white mb-2 leading-snug">
-                        {sec.title}
-                      </h4>
-
-                      {sec.intro && (
-                        <p className={`text-slate-300 italic mb-4 bg-purple-950/30 p-3.5 rounded-xl border border-purple-800/30 ${textSizeClasses[fontSize]}`}>
-                          « {sec.intro} »
-                        </p>
-                      )}
-
-                      {sec.mesureCle && (
-                        <div className="bg-gradient-to-r from-purple-950/90 to-indigo-950/80 border-l-4 border-amber-400 p-4 rounded-r-xl my-3.5 shadow-md">
-                          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-300 mb-1">
-                            <IconStar className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                            <span>Mesure Clé Phare</span>
-                          </div>
-                          <p className={`font-bold text-white ${textSizeClasses[fontSize]}`}>
-                            {sec.mesureCle}
-                          </p>
+                  {/* Sections / Fiches inside Chapter */}
+                  <div className="space-y-4">
+                    {c.sections.map(sec => (
+                      <article
+                        key={sec.id}
+                        className="stitch-card rounded-2xl p-5 border border-purple-800/40 hover:border-purple-600/50 transition-all shadow-md"
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-2 text-xs">
+                          <span className="font-black text-purple-200 bg-purple-900/80 px-2.5 py-0.5 rounded-full border border-purple-500/40">
+                            Fiche #{sec.globalIndex}
+                          </span>
+                          <span className="text-slate-400 text-[11px] font-medium">
+                            {sec.totalMesuresCount} mesures
+                          </span>
                         </div>
-                      )}
 
-                      {sec.mesures.length > 0 && (
-                        <ol className="space-y-2 mt-3">
-                          {sec.mesures.map((m, mIdx) => (
-                            <li
-                              key={mIdx}
-                              className={`flex items-start gap-2.5 text-slate-200 ${textSizeClasses[fontSize]}`}
-                            >
-                              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-900/80 text-purple-200 font-black text-[11px] flex items-center justify-center mt-0.5 border border-purple-700/50">
-                                {mIdx + 1}
-                              </span>
-                              <span>{m}</span>
-                            </li>
-                          ))}
-                        </ol>
-                      )}
-                    </div>
-                  ))}
+                        <h4 className="text-base font-extrabold text-white mb-2 leading-snug">
+                          {sec.title}
+                        </h4>
+
+                        {sec.intro && (
+                          <p className={`text-slate-300 italic mb-4 bg-purple-950/30 p-3.5 rounded-xl border border-purple-800/30 ${textSizeClasses[fontSize]}`}>
+                            « {sec.intro} »
+                          </p>
+                        )}
+
+                        {sec.mesureCle && (
+                          <div className="stitch-mesure-phare my-3.5 shadow-md">
+                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-300 mb-1">
+                              <IconStar size={14} className="text-amber-400" />
+                              <span>Mesure Clé Phare</span>
+                            </div>
+                            <p className={`font-bold text-white ${textSizeClasses[fontSize]}`}>
+                              {sec.mesureCle}
+                            </p>
+                          </div>
+                        )}
+
+                        {sec.mesures.length > 0 && (
+                          <ol className="space-y-2 mt-3">
+                            {sec.mesures.map((m, mIdx) => (
+                              <li
+                                key={mIdx}
+                                className={`flex items-start gap-2.5 text-slate-200 ${textSizeClasses[fontSize]}`}
+                              >
+                                <span className="text-purple-400 font-black text-xs mt-1">•</span>
+                                <span>{m}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        )}
+
+                        <div className="mt-4 pt-3 border-t border-purple-900/40 flex justify-end">
+                          <button
+                            onClick={() => onOpenSectionModal(sec)}
+                            className="text-xs font-bold text-purple-300 hover:text-amber-300 flex items-center gap-1 transition-colors"
+                          >
+                            <span>Consulter la fiche détaillée</span>
+                            <IconChevronRight size={14} />
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
     </div>
   );
 };

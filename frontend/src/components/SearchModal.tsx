@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Section, Profile } from '../types/programme';
 import { IconSearch, IconClose, IconChevronRight, renderProfileIcon, getProfileColor } from './Icons';
 
@@ -52,14 +52,14 @@ export const SearchModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in text-white">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md text-white">
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl bg-[#140626] border border-purple-500/40 rounded-b-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10 animate-slide-up">
+      <div className="relative w-full max-w-2xl bg-[#140626] border border-purple-500/40 rounded-b-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10">
         {/* Search Input Bar */}
         <div className="p-4 sm:p-5 border-b border-purple-500/20 flex items-center gap-3 bg-[#190730]">
           <div className="p-2 bg-purple-900/60 rounded-xl text-purple-300">
-            <IconSearch className="w-5 h-5" />
+            <IconSearch size={18} />
           </div>
           <input
             ref={inputRef}
@@ -74,7 +74,7 @@ export const SearchModal = ({
               onClick={() => setQuery('')}
               className="p-1.5 text-slate-400 hover:text-white rounded-full transition-colors"
             >
-              <IconClose className="w-4 h-4" />
+              <IconClose size={16} />
             </button>
           )}
           <button
@@ -151,7 +151,7 @@ export const SearchModal = ({
                     {sec.mesureCle || sec.intro}
                   </p>
                 </div>
-                <IconChevronRight className="w-4 h-4 text-purple-500 group-hover:text-amber-300 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                <IconChevronRight size={16} className="text-purple-500 group-hover:text-amber-300 group-hover:translate-x-1 transition-all flex-shrink-0" />
               </div>
             ))
           )}

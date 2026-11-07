@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { Section, Profile, AlertConfig } from '../types/programme';
 import {
   scheduleDailyFicheAlert,
@@ -69,15 +69,15 @@ export const AlertSettingsModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md text-white">
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg bg-[#140626] border border-purple-500/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 animate-slide-up">
+      <div className="relative w-full max-w-lg bg-[#140626] border border-purple-500/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10">
         {/* Header */}
         <div className="px-6 py-5 border-b border-purple-500/20 flex items-center justify-between bg-gradient-to-r from-purple-950 via-[#1d0638] to-[#120025]">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-2xl shadow-md text-amber-300">
-              <IconBell className="w-6 h-6" />
+              <IconBell size={24} />
             </div>
             <div>
               <h2 className="text-lg font-black tracking-tight text-white">Alertes &amp; Rappels AEC</h2>
@@ -88,7 +88,7 @@ export const AlertSettingsModal = ({
             onClick={onClose}
             className="p-1.5 text-purple-300 hover:text-white rounded-full transition-colors"
           >
-            <IconClose className="w-5 h-5" />
+            <IconClose size={20} />
           </button>
         </div>
 
@@ -203,7 +203,7 @@ export const AlertSettingsModal = ({
                   onClick={handleTestNow}
                   className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-98"
                 >
-                  <IconBell className="w-4 h-4 text-slate-950" />
+                  <IconBell size={16} className="text-slate-950" />
                   {testSuccess ? 'Notification déclenchée !' : "Tester l'alerte maintenant (popup 3s)"}
                 </button>
               </div>
@@ -225,7 +225,7 @@ export const AlertSettingsModal = ({
           >
             {savedSuccess ? (
               <>
-                <IconCheck className="w-4 h-4 text-emerald-400" />
+                <IconCheck size={16} className="text-emerald-400" />
                 Enregistré !
               </>
             ) : (

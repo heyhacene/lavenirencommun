@@ -1,4 +1,4 @@
-﻿import type { Section, Profile } from '../types/programme';
+import type { Section, Profile } from '../types/programme';
 import { IconChevronRight, IconStar, renderProfileIcon, getProfileColor } from './Icons';
 
 interface CardFicheProps {
@@ -13,12 +13,12 @@ export const CardFiche = ({ section, profiles, onOpenModal }: CardFicheProps) =>
   return (
     <article
       onClick={() => onOpenModal(section)}
-      className="glass-panel glass-panel-hover rounded-2xl p-5 transition-all duration-200 cursor-pointer active:scale-[0.99] group flex flex-col justify-between relative overflow-hidden"
+      className="stitch-card group cursor-pointer active:scale-[0.99]"
     >
       {/* Subtle campaign diagonal glow */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none -mr-10 -mt-10 group-hover:bg-purple-500/20 transition-all" />
 
-      <div>
+      <div className="flex-1 flex flex-col">
         {/* Top meta tags */}
         <div className="flex items-center justify-between gap-2 mb-3 text-xs">
           <span className="font-black text-purple-200 bg-purple-900/70 border border-purple-500/40 px-2.5 py-1 rounded-full text-[11px] tracking-wide shadow-xs">
@@ -36,9 +36,9 @@ export const CardFiche = ({ section, profiles, onOpenModal }: CardFicheProps) =>
 
         {/* Mesure clé phare */}
         {section.mesureCle ? (
-          <div className="bg-gradient-to-r from-purple-950/80 via-purple-900/40 to-slate-900/60 border-l-4 border-amber-400 rounded-r-xl p-3.5 my-2.5 text-xs text-slate-200 shadow-inner">
+          <div className="stitch-mesure-phare my-2.5 text-xs text-slate-200 shadow-inner">
             <div className="flex items-center gap-1.5 font-black text-amber-300 mb-1 tracking-wider uppercase text-[10px]">
-              <IconStar className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <IconStar className="text-amber-400" size={14} />
               <span>Mesure Clé Phare</span>
             </div>
             <p className="line-clamp-3 font-medium leading-relaxed text-slate-100">
@@ -52,7 +52,7 @@ export const CardFiche = ({ section, profiles, onOpenModal }: CardFicheProps) =>
         )}
 
         {/* Profile badges */}
-        <div className="flex flex-wrap gap-1.5 mt-3.5">
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
           {section.profiles.slice(0, 3).map(pid => {
             const prof = profileMap.get(pid);
             if (!prof) return null;
@@ -82,7 +82,7 @@ export const CardFiche = ({ section, profiles, onOpenModal }: CardFicheProps) =>
         </span>
         <span className="inline-flex items-center gap-1 font-bold text-purple-300 group-hover:text-amber-300 group-hover:translate-x-0.5 transition-all text-xs">
           Lire l'intégralité
-          <IconChevronRight className="w-3.5 h-3.5 text-purple-400 group-hover:text-amber-300" />
+          <IconChevronRight className="text-purple-400 group-hover:text-amber-300" size={14} />
         </span>
       </div>
     </article>

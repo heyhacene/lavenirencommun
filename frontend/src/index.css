@@ -1,17 +1,19 @@
-﻿@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #0B0118;
+  background-color: #070114;
   color: #F8FAFC;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -20,47 +22,167 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient campaign background glow */
-.bg-campaign-radial {
-  background:
-    radial-gradient(circle at 15% 10%, rgba(124, 58, 237, 0.22) 0%, transparent 45%),
-    radial-gradient(circle at 85% 25%, rgba(239, 68, 68, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 50% 70%, rgba(76, 2, 151, 0.2) 0%, transparent 60%),
-    #0B0118;
+/* Reset default browser borders and sizing */
+button {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  text-align: inherit;
 }
 
-/* Glassmorphism surfaces */
-.glass-panel {
-  background: rgba(26, 10, 48, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+/* --- Stitch Mobile App Design System --- */
+
+/* App Header */
+.stitch-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: rgba(11, 1, 24, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Bottom Navigation Bar */
+.stitch-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(11, 1, 24, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(168, 85, 247, 0.22);
+  padding-top: 8px;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
+  padding-left: 12px;
+  padding-right: 12px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+/* Hero Section */
+.stitch-hero {
+  background: radial-gradient(circle at 85% 15%, rgba(147, 51, 234, 0.22) 0%, rgba(16, 3, 38, 0.92) 65%), #0d021f;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stat Box */
+.stitch-stat-box {
+  background: rgba(28, 8, 58, 0.55);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 16px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+}
+
+.stitch-stat-box:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+  background: rgba(36, 12, 74, 0.7);
+}
+
+/* Search Bar Pill */
+.stitch-search-pill {
+  background: rgba(20, 5, 42, 0.75);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.stitch-search-pill:hover {
+  background: rgba(30, 8, 62, 0.9);
+  border-color: rgba(192, 132, 252, 0.6);
+}
+
+/* Category Filter Chips */
+.stitch-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.stitch-chip-active {
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+  transform: scale(1.02);
+}
+
+.stitch-chip-inactive {
+  background: rgba(22, 6, 46, 0.65);
+  color: #d8b4fe;
   border: 1px solid rgba(168, 85, 247, 0.2);
 }
 
-.glass-panel-hover:hover {
-  background: rgba(36, 14, 66, 0.85);
-  border-color: rgba(192, 132, 252, 0.45);
-  box-shadow: 0 12px 32px -8px rgba(76, 2, 151, 0.5);
+.stitch-chip-inactive:hover {
+  background: rgba(34, 10, 70, 0.85);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #ffffff;
 }
 
-.glass-card {
-  background: linear-gradient(135deg, rgba(30, 11, 58, 0.75) 0%, rgba(18, 5, 36, 0.85) 100%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+/* Fiche Cards */
+.stitch-card {
+  background: linear-gradient(145deg, rgba(28, 9, 58, 0.7) 0%, rgba(15, 3, 32, 0.85) 100%);
   border: 1px solid rgba(147, 51, 234, 0.22);
+  border-radius: 20px;
+  padding: 18px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Glow effects */
-.glow-phi {
-  box-shadow: 0 0 25px rgba(168, 85, 247, 0.5), 0 0 50px rgba(124, 58, 237, 0.25);
+.stitch-card:hover {
+  border-color: rgba(192, 132, 252, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -8px rgba(76, 2, 151, 0.5);
 }
 
-.glow-coral {
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
-}
-
-.glow-gold {
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+/* Mesure Phare Callout */
+.stitch-mesure-phare {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 14px;
+  padding: 12px 14px;
 }
 
 /* Custom scrollbars */
@@ -69,7 +191,7 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B0118;
+  background: #070114;
 }
 ::-webkit-scrollbar-thumb {
   background: #4C0297;
@@ -79,35 +201,7 @@ body {
   background: #7C3AED;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.animate-slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes pulseSubtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
-}
-
-.animate-pulse-subtle {
-  animation: pulseSubtle 3s ease-in-out infinite;
-}
-
-/* Hide scrollbar for tabs */
+/* Hide scrollbar for carousel */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

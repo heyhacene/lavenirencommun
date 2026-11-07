@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { Section, Profile } from '../types/programme';
 import { IconClose, IconCheck, IconShare, IconBell, IconStar, renderProfileIcon, getProfileColor } from './Icons';
 
@@ -40,11 +40,11 @@ export const ModalFicheIntegrale = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md">
       {/* Backdrop click */}
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-[#140626] border border-purple-500/40 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 animate-slide-up text-white">
+      <div className="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-[#140626] border border-purple-500/40 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 text-white">
         {/* Sticky Header */}
         <div className="sticky top-0 z-20 bg-[#16062b]/95 backdrop-blur-md px-6 py-4 border-b border-purple-500/20 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -63,7 +63,7 @@ export const ModalFicheIntegrale = ({
                 title="Tester l'alerte sur cette fiche"
                 className="p-2 text-purple-300 hover:text-amber-300 hover:bg-purple-900/60 rounded-full transition-colors"
               >
-                <IconBell className="w-5 h-5" />
+                <IconBell size={18} />
               </button>
             )}
             <button
@@ -71,13 +71,13 @@ export const ModalFicheIntegrale = ({
               title="Partager"
               className="p-2 text-purple-300 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors"
             >
-              {copied ? <IconCheck className="w-5 h-5 text-emerald-400" /> : <IconShare className="w-5 h-5" />}
+              {copied ? <IconCheck size={18} className="text-emerald-400" /> : <IconShare size={18} />}
             </button>
             <button
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors"
             >
-              <IconClose className="w-5 h-5" />
+              <IconClose size={20} />
             </button>
           </div>
         </div>
@@ -103,9 +103,9 @@ export const ModalFicheIntegrale = ({
 
           {/* Mesure clé highlighted in campaign glow */}
           {section.mesureCle && (
-            <div className="bg-gradient-to-br from-purple-900/90 via-purple-950 to-indigo-950 p-5 rounded-2xl border-2 border-amber-400/80 shadow-xl space-y-2 relative overflow-hidden">
+            <div className="stitch-mesure-phare p-5 rounded-2xl shadow-xl space-y-2 relative overflow-hidden">
               <div className="flex items-center gap-2 text-xs font-black tracking-wider uppercase text-amber-300">
-                <IconStar className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <IconStar size={16} className="text-amber-400" />
                 <span>Mesure Clé Phare du Mandat</span>
               </div>
               <p className="text-base font-bold text-white leading-relaxed">
