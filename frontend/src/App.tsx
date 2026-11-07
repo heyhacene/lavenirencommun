@@ -16,7 +16,6 @@ import {
   IconBudget,
   IconPlans,
   IconBookOpen,
-  IconPhi,
   getProfileColor,
   renderProfileIcon
 } from './components/Icons';
@@ -84,8 +83,8 @@ export default function App() {
         <div className="relative z-10 flex flex-col items-center text-center">
           <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-500 blur-lg opacity-60 animate-pulse" />
-            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#240046] via-[#10002b] to-[#3c096c] border border-purple-400/40 flex items-center justify-center shadow-2xl">
-              <IconPhi className="text-white" size={48} />
+            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#240046] via-[#10002b] to-[#3c096c] border border-purple-400/40 flex items-center justify-center shadow-2xl p-3">
+              <img src="/logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
             </div>
           </div>
 
@@ -115,8 +114,8 @@ export default function App() {
       <header className="stitch-header flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="relative group flex-shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2e0059] via-[#150033] to-[#4c0297] border border-purple-400/40 flex items-center justify-center text-white shadow-md">
-              <IconPhi className="text-white" size={24} />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2e0059] via-[#150033] to-[#4c0297] border border-purple-400/40 flex items-center justify-center shadow-md p-1.5">
+              <img src="/logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
             </div>
           </div>
           <div>
