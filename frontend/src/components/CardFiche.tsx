@@ -1,5 +1,5 @@
 ﻿import type { Section, Profile } from '../types/programme';
-import { IconChevronRight, renderProfileIcon } from './Icons';
+import { IconChevronRight, IconStar, renderProfileIcon, getProfileColor } from './Icons';
 
 interface CardFicheProps {
   section: Section;
@@ -7,63 +7,68 @@ interface CardFicheProps {
   onOpenModal: (section: Section) => void;
 }
 
-export const CardFiche: React.FC<CardFicheProps> = ({ section, profiles, onOpenModal }) => {
+export const CardFiche = ({ section, profiles, onOpenModal }: CardFicheProps) => {
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
   return (
     <article
       onClick={() => onOpenModal(section)}
-      className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer active:scale-[0.99] group flex flex-col justify-between"
+      className="glass-panel glass-panel-hover rounded-2xl p-5 transition-all duration-200 cursor-pointer active:scale-[0.99] group flex flex-col justify-between relative overflow-hidden"
     >
+      {/* Subtle campaign diagonal glow */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none -mr-10 -mt-10 group-hover:bg-purple-500/20 transition-all" />
+
       <div>
         {/* Top meta tags */}
-        <div className="flex items-center justify-between gap-2 mb-2 text-xs">
-          <span className="font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full">
-            Fiche #{section.globalIndex}
+        <div className="flex items-center justify-between gap-2 mb-3 text-xs">
+          <span className="font-black text-purple-200 bg-purple-900/70 border border-purple-500/40 px-2.5 py-1 rounded-full text-[11px] tracking-wide shadow-xs">
+            FICHE #{section.globalIndex}
           </span>
-          <span className="text-slate-500 truncate max-w-[200px]">
+          <span className="text-slate-400 text-[11px] font-semibold truncate max-w-[210px]">
             Partie {section.partieNumber} • {section.chapitreTitle}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="text-base font-bold text-slate-900 group-hover:text-purple-700 transition-colors line-clamp-2 mb-2.5 leading-snug">
+        <h3 className="text-base font-extrabold text-white group-hover:text-purple-200 transition-colors line-clamp-2 mb-3 leading-snug">
           {section.title}
         </h3>
 
-        {/* Mesure clé condencee */}
+        {/* Mesure clé phare */}
         {section.mesureCle ? (
-          <div className="bg-gradient-to-r from-purple-50/70 to-indigo-50/50 border-l-4 border-purple-600 rounded-r-xl p-3 my-2 text-xs leading-relaxed text-slate-800">
-            <span className="font-bold text-purple-900 block mb-1 uppercase tracking-wider text-[10px]">
-              ⭐ Mesure Clé Phare
-            </span>
-            <p className="line-clamp-3 font-medium">
+          <div className="bg-gradient-to-r from-purple-950/80 via-purple-900/40 to-slate-900/60 border-l-4 border-amber-400 rounded-r-xl p-3.5 my-2.5 text-xs text-slate-200 shadow-inner">
+            <div className="flex items-center gap-1.5 font-black text-amber-300 mb-1 tracking-wider uppercase text-[10px]">
+              <IconStar className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span>Mesure Clé Phare</span>
+            </div>
+            <p className="line-clamp-3 font-medium leading-relaxed text-slate-100">
               {section.mesureCle}
             </p>
           </div>
         ) : (
-          <p className="text-xs text-slate-600 line-clamp-3 mb-2 leading-relaxed">
-            {section.intro}
+          <p className="text-xs text-slate-300 line-clamp-3 mb-2.5 leading-relaxed italic bg-purple-950/30 p-3 rounded-xl border border-purple-800/30">
+            « {section.intro} »
           </p>
         )}
 
         {/* Profile badges */}
-        <div className="flex flex-wrap gap-1.5 mt-3">
+        <div className="flex flex-wrap gap-1.5 mt-3.5">
           {section.profiles.slice(0, 3).map(pid => {
             const prof = profileMap.get(pid);
             if (!prof) return null;
+            const colors = getProfileColor(pid);
             return (
               <span
                 key={pid}
-                className="inline-flex items-center gap-1 text-[11px] font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md"
+                className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border ${colors.bg} ${colors.text} ${colors.border}`}
               >
-                {renderProfileIcon(prof.icon, "w-3 h-3 text-purple-600")}
+                {renderProfileIcon(prof.icon, "w-3 h-3")}
                 {prof.label.split('&')[0].trim()}
               </span>
             );
           })}
           {section.profiles.length > 3 && (
-            <span className="text-[11px] text-slate-400 font-medium px-1.5 py-0.5">
+            <span className="text-[11px] text-purple-300/80 font-bold px-2 py-1 bg-purple-950/50 rounded-lg border border-purple-800/40">
               +{section.profiles.length - 3}
             </span>
           )}
@@ -71,13 +76,13 @@ export const CardFiche: React.FC<CardFicheProps> = ({ section, profiles, onOpenM
       </div>
 
       {/* Footer action */}
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span className="font-medium text-slate-600">
-          {section.totalMesuresCount} mesure{section.totalMesuresCount > 1 ? 's' : ''} au total
+      <div className="mt-4 pt-3.5 border-t border-purple-500/15 flex items-center justify-between text-xs">
+        <span className="text-slate-400 font-medium text-[11px]">
+          {section.totalMesuresCount} mesure{section.totalMesuresCount > 1 ? 's' : ''} au programme
         </span>
-        <span className="inline-flex items-center gap-1 font-semibold text-purple-700 group-hover:translate-x-0.5 transition-transform">
-          Voir l'intégralité
-          <IconChevronRight className="w-3.5 h-3.5" />
+        <span className="inline-flex items-center gap-1 font-bold text-purple-300 group-hover:text-amber-300 group-hover:translate-x-0.5 transition-all text-xs">
+          Lire l'intégralité
+          <IconChevronRight className="w-3.5 h-3.5 text-purple-400 group-hover:text-amber-300" />
         </span>
       </div>
     </article>

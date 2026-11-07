@@ -6,84 +6,87 @@ interface BudgetViewProps {
   budget: Budget;
 }
 
-export const BudgetView: React.FC<BudgetViewProps> = ({ budget }) => {
+export const BudgetView = ({ budget }: BudgetViewProps) => {
   const [activeTab, setActiveTab] = useState<'depenses' | 'recettes' | 'investissement'>('depenses');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
   return (
-    <div className="max-w-3xl mx-auto pb-24 space-y-6">
+    <div className="max-w-3xl mx-auto pb-24 space-y-6 text-white">
       {/* Hero Header */}
-      <div className="bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
-        <span className="text-xs font-bold uppercase tracking-wider text-purple-300 block mb-1">
-          Chiffrage Officiel 2027
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-black mb-2">
-          {budget.title}
-        </h1>
-        <p className="text-xs sm:text-sm text-purple-200 leading-relaxed max-w-xl">
-          {budget.subtitle}
-        </p>
-
-        {/* 4 Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-6">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center">
-            <span className="text-[11px] text-purple-200 block font-medium">Dépenses</span>
-            <span className="text-lg sm:text-xl font-black text-rose-300">
-              {budget.balanceTotal.depensesAnnuelles}
-            </span>
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2b0854] via-[#1d0638] to-[#120025] rounded-3xl p-6 sm:p-8 border border-purple-500/40 shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 bg-purple-900/80 border border-purple-500/40 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider text-amber-300 mb-2">
+            <span>Chiffrage Officiel • Élection 2027</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white mb-2 leading-tight">
+            {budget.title}
+          </h1>
+          <p className="text-xs sm:text-sm text-purple-200/90 leading-relaxed max-w-xl">
+            {budget.subtitle}
+          </p>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center">
-            <span className="text-[11px] text-purple-200 block font-medium">Recettes</span>
-            <span className="text-lg sm:text-xl font-black text-emerald-300">
-              {budget.balanceTotal.recettesAnnuelles}
-            </span>
-          </div>
+          {/* 4 Summary Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-6">
+            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-rose-500/30 text-center shadow-lg">
+              <span className="text-[11px] text-rose-300 block font-bold uppercase tracking-wider">Dépenses</span>
+              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+                {budget.balanceTotal.depensesAnnuelles}
+              </span>
+            </div>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center">
-            <span className="text-[11px] text-purple-200 block font-medium">Baisses d'impôts</span>
-            <span className="text-lg sm:text-xl font-black text-amber-300">
-              {budget.balanceTotal.baissesImpotsEtCouts}
-            </span>
-          </div>
+            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-emerald-500/30 text-center shadow-lg">
+              <span className="text-[11px] text-emerald-300 block font-bold uppercase tracking-wider">Recettes</span>
+              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+                {budget.balanceTotal.recettesAnnuelles}
+              </span>
+            </div>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center">
-            <span className="text-[11px] text-purple-200 block font-medium">Pôle Invest.</span>
-            <span className="text-lg sm:text-xl font-black text-cyan-300">
-              {budget.balanceTotal.polePublicInvestissement}
-            </span>
+            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-amber-500/30 text-center shadow-lg">
+              <span className="text-[11px] text-amber-300 block font-bold uppercase tracking-wider">Allègements</span>
+              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+                {budget.balanceTotal.baissesImpotsEtCouts}
+              </span>
+            </div>
+
+            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-cyan-500/30 text-center shadow-lg">
+              <span className="text-[11px] text-cyan-300 block font-bold uppercase tracking-wider">Pôle Invest.</span>
+              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+                {budget.balanceTotal.polePublicInvestissement}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-slate-100 p-1.5 rounded-2xl">
+      <div className="flex bg-[#16062b] p-1.5 rounded-2xl border border-purple-500/20">
         <button
           onClick={() => setActiveTab('depenses')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all ${
             activeTab === 'depenses'
-              ? 'bg-white text-purple-900 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white'
           }`}
         >
           Où va l'argent ? (Dépenses)
         </button>
         <button
           onClick={() => setActiveTab('recettes')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all ${
             activeTab === 'recettes'
-              ? 'bg-white text-purple-900 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white'
           }`}
         >
           D'où vient l'argent ? (Recettes)
         </button>
         <button
           onClick={() => setActiveTab('investissement')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all ${
+          className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all ${
             activeTab === 'investissement'
-              ? 'bg-white text-purple-900 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white'
           }`}
         >
           Pôle Investissement
@@ -93,38 +96,38 @@ export const BudgetView: React.FC<BudgetViewProps> = ({ budget }) => {
       {/* Tab 1: Dépenses */}
       {activeTab === 'depenses' && (
         <div className="space-y-3">
-          <div className="text-xs text-slate-500 font-medium px-2">
-            5 grands pôles de dépenses prioritaires pour réparer le pays :
+          <div className="text-xs text-purple-300 font-semibold px-2">
+            5 pôles de dépenses prioritaires pour la bifurcation écologique et la justice sociale :
           </div>
           {budget.depensesCategories.map((cat, idx) => {
             const isExpanded = expandedIndex === idx;
             return (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden"
+                className="glass-panel rounded-2xl border border-purple-500/20 overflow-hidden shadow-lg transition-colors"
               >
                 <button
                   onClick={() => setExpandedIndex(isExpanded ? null : idx)}
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50/50 transition-colors"
+                  className="w-full p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-2.5 h-2.5 rounded-full bg-purple-600" />
+                  <div className="flex items-center gap-3.5">
+                    <span className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 shadow-sm" />
                     <div>
-                      <h3 className="font-bold text-sm text-slate-900">{cat.category}</h3>
-                      <span className="text-xs font-semibold text-purple-700">{cat.amount}</span>
+                      <h3 className="font-extrabold text-sm sm:text-base text-white">{cat.category}</h3>
+                      <span className="text-xs font-black text-amber-300">{cat.amount}</span>
                     </div>
                   </div>
                   <IconChevronDown
-                    className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-purple-400 transition-transform ${isExpanded ? 'rotate-180 text-amber-300' : ''}`}
                   />
                 </button>
 
                 {isExpanded && (
-                  <div className="px-5 pb-5 pt-1 border-t border-slate-100 bg-slate-50/50">
-                    <ul className="space-y-2 mt-2">
+                  <div className="px-5 pb-5 pt-2 border-t border-purple-900/50 bg-[#120324]/80">
+                    <ul className="space-y-2.5 mt-2">
                       {cat.items.map((item, iIdx) => (
-                        <li key={iIdx} className="flex items-start gap-2.5 text-xs text-slate-700 leading-relaxed">
-                          <span className="text-purple-600 font-bold mt-0.5">•</span>
+                        <li key={iIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">
+                          <span className="text-amber-400 font-black mt-0.5">•</span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -140,21 +143,21 @@ export const BudgetView: React.FC<BudgetViewProps> = ({ budget }) => {
       {/* Tab 2: Recettes */}
       {activeTab === 'recettes' && (
         <div className="space-y-3">
-          <div className="text-xs text-slate-500 font-medium px-2">
-            La justice fiscale : faire payer ceux qui ont trop pour financer l'essentiel
+          <div className="text-xs text-purple-300 font-semibold px-2">
+            Justice fiscale : faire contribuer les multinationales, les superprofits et les ultra-riches
           </div>
           {budget.recettesCategories.map((rec, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm"
+              className="glass-panel rounded-2xl p-5 border border-purple-500/20 shadow-lg"
             >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold text-sm text-slate-900">{rec.source}</h3>
-                <span className="text-sm font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h3 className="font-bold text-sm sm:text-base text-white">{rec.source}</h3>
+                <span className="text-xs sm:text-sm font-black text-emerald-300 bg-emerald-950/70 border border-emerald-500/40 px-3 py-1 rounded-full whitespace-nowrap">
                   {rec.amount}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {rec.details}
               </p>
             </div>
@@ -164,43 +167,43 @@ export const BudgetView: React.FC<BudgetViewProps> = ({ budget }) => {
 
       {/* Tab 3: Pôle d'investissement */}
       {activeTab === 'investissement' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-50 rounded-2xl">
-              <span className="text-2xl font-black text-purple-800">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-purple-500/30 shadow-2xl space-y-5">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-gradient-to-tr from-cyan-600 to-purple-600 rounded-2xl shadow-xl">
+              <span className="text-2xl sm:text-3xl font-black text-white">
                 {budget.poleInvestissement.total}
               </span>
             </div>
             <div>
-              <h3 className="font-bold text-base text-slate-900">
+              <h3 className="font-black text-base sm:text-lg text-white">
                 Grand Pôle Public d'Investissement
               </h3>
-              <p className="text-xs text-slate-500">
-                Hors budget de fonctionnement annuel
+              <p className="text-xs text-purple-300">
+                Financement écologique d'avenir (infrastructures, mer, rail, énergie)
               </p>
             </div>
           </div>
 
-          <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed bg-[#120324] p-4.5 rounded-2xl border border-purple-800/40">
             {budget.poleInvestissement.description}
           </p>
 
-          <div className="space-y-2 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Projets stratégiques financés :
+          <div className="space-y-2.5 pt-2">
+            <h4 className="text-xs font-black uppercase tracking-wider text-purple-300">
+              Chantiers prioritaires financés :
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                🚆 <strong>Réseau ferroviaire &amp; Fret</strong> : réouverture des petites lignes et trains de nuit.
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-200">
+              <div className="p-3.5 bg-purple-950/40 rounded-xl border border-purple-800/40">
+                🚆 <strong>Réseau ferroviaire &amp; Fret</strong> : réouverture des lignes de desserte fine et trains de nuit.
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                💧 <strong>Réseaux d'eau</strong> : réparation des 20% de fuites d'eau potable en France.
+              <div className="p-3.5 bg-purple-950/40 rounded-xl border border-purple-800/40">
+                💧 <strong>Réseaux d'eau potable</strong> : fin des fuites (1 litre sur 5 perdu) et gestion publique.
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                ⚡ <strong>Énergies renouvelables</strong> : parc éolien en mer, solaire public, géothermie.
+              <div className="p-3.5 bg-purple-950/40 rounded-xl border border-purple-800/40">
+                ⚡ <strong>Énergies renouvelables</strong> : parc éolien citoyen en mer, géothermie, solaire sur toits.
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                🏭 <strong>Relocalisations industrielles</strong> : souveraineté sanitaire et numérique.
+              <div className="p-3.5 bg-purple-950/40 rounded-xl border border-purple-800/40">
+                🏭 <strong>Relocalisations industrielles</strong> : souveraineté sur les médicaments et composants clés.
               </div>
             </div>
           </div>

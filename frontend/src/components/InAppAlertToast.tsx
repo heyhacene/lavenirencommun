@@ -1,5 +1,5 @@
 ﻿import type { Section } from '../types/programme';
-import { IconBell, IconClose, IconChevronRight } from './Icons';
+import { IconBell, IconClose, IconChevronRight, IconStar } from './Icons';
 
 interface InAppAlertToastProps {
   section: Section | null;
@@ -7,24 +7,32 @@ interface InAppAlertToastProps {
   onDismiss: () => void;
 }
 
-export const InAppAlertToast: React.FC<InAppAlertToastProps> = ({
+export const InAppAlertToast = ({
   section,
   onOpenFiche,
   onDismiss
-}) => {
+}: InAppAlertToastProps) => {
   if (!section) return null;
 
   return (
-    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 animate-slide-up">
-      <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-purple-500/30 backdrop-blur-lg flex flex-col gap-2.5">
+    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[420px] z-50 animate-slide-up">
+      <div className="bg-[#170530]/95 backdrop-blur-xl text-white p-4.5 rounded-2xl shadow-2xl border-2 border-purple-500/50 flex flex-col gap-3 relative overflow-hidden">
+        {/* Top ambient glow */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none -mr-10 -mt-10" />
+
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-purple-600 rounded-lg text-white">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 bg-gradient-to-tr from-purple-600 to-rose-600 rounded-xl text-white shadow-md">
               <IconBell className="w-4 h-4 text-amber-300" />
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-300">
-              Alerte Fiche • #{section.globalIndex}
-            </span>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 block">
+                ALERTE PROGRAMME 2027
+              </span>
+              <span className="text-xs text-purple-200 font-bold">
+                Fiche #{section.globalIndex} • Partie {section.partieNumber}
+              </span>
+            </div>
           </div>
           <button
             onClick={onDismiss}
@@ -34,32 +42,38 @@ export const InAppAlertToast: React.FC<InAppAlertToastProps> = ({
           </button>
         </div>
 
-        <div>
-          <h4 className="text-sm font-bold text-white line-clamp-1">
+        <div className="bg-purple-950/40 p-3 rounded-xl border border-purple-800/40">
+          <h4 className="text-sm font-bold text-white line-clamp-1 mb-1">
             {section.title}
           </h4>
-          <p className="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">
+          <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed">
             {section.mesureCle || section.intro}
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-800">
-          <button
-            onClick={onDismiss}
-            className="text-xs text-slate-400 hover:text-slate-200 px-2 py-1"
-          >
-            Fermer
-          </button>
-          <button
-            onClick={() => {
-              onOpenFiche(section);
-              onDismiss();
-            }}
-            className="text-xs font-bold text-purple-300 hover:text-white bg-purple-600/50 hover:bg-purple-600 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
-          >
-            Voir la fiche
-            <IconChevronRight className="w-3.5 h-3.5" />
-          </button>
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center gap-1 text-[11px] text-purple-300/80 font-semibold">
+            <IconStar className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span>Mesure clé du jour</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onDismiss}
+              className="text-xs text-slate-400 hover:text-white px-2 py-1 font-semibold"
+            >
+              Ignorer
+            </button>
+            <button
+              onClick={() => {
+                onOpenFiche(section);
+                onDismiss();
+              }}
+              className="text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 px-3.5 py-1.5 rounded-xl flex items-center gap-1 transition-all shadow-md active:scale-95"
+            >
+              Voir la fiche
+              <IconChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

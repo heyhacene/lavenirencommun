@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react';
 import type { Section, Profile } from '../types/programme';
-import { IconClose, IconCheck, IconShare, IconBell, renderProfileIcon } from './Icons';
+import { IconClose, IconCheck, IconShare, IconBell, IconStar, renderProfileIcon, getProfileColor } from './Icons';
 
 interface ModalFicheIntegraleProps {
   section: Section | null;
@@ -9,12 +9,12 @@ interface ModalFicheIntegraleProps {
   onSetAlertForFiche?: (section: Section) => void;
 }
 
-export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
+export const ModalFicheIntegrale = ({
   section,
   profiles,
   onClose,
   onSetAlertForFiche
-}) => {
+}: ModalFicheIntegraleProps) => {
   const [copied, setCopied] = useState(false);
 
   if (!section) return null;
@@ -22,7 +22,7 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
   const handleShare = async () => {
-    const textToShare = `${section.title}\n\nMesure clé :\n${section.mesureCle}\n\nProgramme L'Avenir en commun 2027`;
+    const textToShare = `${section.title}\n\n★ MESURE CLÉ :\n${section.mesureCle}\n\nProgramme officiel L'Avenir en commun 2027 (Jean-Luc Mélenchon)`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -40,19 +40,19 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in">
       {/* Backdrop click */}
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 animate-slide-up">
+      <div className="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-[#140626] border border-purple-500/40 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 animate-slide-up text-white">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold bg-purple-100 text-purple-900 px-3 py-1 rounded-full">
-              Fiche #{section.globalIndex}
+        <div className="sticky top-0 z-20 bg-[#16062b]/95 backdrop-blur-md px-6 py-4 border-b border-purple-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full shadow-sm">
+              FICHE #{section.globalIndex}
             </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Partie {section.partieNumber}
+            <span className="text-xs text-purple-300 font-semibold truncate max-w-[200px]">
+              Partie {section.partieNumber} • {section.chapitreTitle}
             </span>
           </div>
 
@@ -61,7 +61,7 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
               <button
                 onClick={() => onSetAlertForFiche(section)}
                 title="Tester l'alerte sur cette fiche"
-                className="p-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-full transition-colors"
+                className="p-2 text-purple-300 hover:text-amber-300 hover:bg-purple-900/60 rounded-full transition-colors"
               >
                 <IconBell className="w-5 h-5" />
               </button>
@@ -69,13 +69,13 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
             <button
               onClick={handleShare}
               title="Partager"
-              className="p-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-full transition-colors"
+              className="p-2 text-purple-300 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors"
             >
-              {copied ? <IconCheck className="w-5 h-5 text-emerald-600" /> : <IconShare className="w-5 h-5" />}
+              {copied ? <IconCheck className="w-5 h-5 text-emerald-400" /> : <IconShare className="w-5 h-5" />}
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
+              className="p-2 text-slate-400 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors"
             >
               <IconClose className="w-5 h-5" />
             </button>
@@ -83,31 +83,32 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto px-6 py-5 space-y-5 text-slate-900">
+        <div className="overflow-y-auto px-6 py-6 space-y-6">
           {/* Breadcrumb info */}
-          <div className="text-xs font-medium text-purple-800">
-            {section.partieTitle} &bull; {section.chapitreTitle}
+          <div className="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-2">
+            <span>Partie {section.partieNumber} : {section.partieTitle}</span>
           </div>
 
           {/* Section title */}
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-white leading-tight">
             {section.title}
           </h2>
 
           {/* Intro paragraph if present */}
           {section.intro && (
-            <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 italic">
+            <p className="text-sm text-slate-300 leading-relaxed bg-purple-950/40 p-4 rounded-2xl border border-purple-800/40 italic">
               « {section.intro} »
             </p>
           )}
 
-          {/* Mesure clé highlighted */}
+          {/* Mesure clé highlighted in campaign glow */}
           {section.mesureCle && (
-            <div className="bg-purple-900 text-white p-5 rounded-2xl shadow-md space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-purple-200">
-                <span className="text-amber-400">★</span> Mesure Clé Phare
+            <div className="bg-gradient-to-br from-purple-900/90 via-purple-950 to-indigo-950 p-5 rounded-2xl border-2 border-amber-400/80 shadow-xl space-y-2 relative overflow-hidden">
+              <div className="flex items-center gap-2 text-xs font-black tracking-wider uppercase text-amber-300">
+                <IconStar className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <span>Mesure Clé Phare du Mandat</span>
               </div>
-              <p className="text-base font-semibold leading-relaxed">
+              <p className="text-base font-bold text-white leading-relaxed">
                 {section.mesureCle}
               </p>
             </div>
@@ -115,25 +116,28 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
 
           {/* Full measures list */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-              Version intégrale des mesures ({section.mesures.length})
-            </h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-xs font-black uppercase tracking-wider text-purple-300">
+                Version intégrale des mesures ({section.mesures.length})
+              </h4>
+              <span className="text-[11px] text-slate-400 font-medium">Texte officiel 2027</span>
+            </div>
 
             {section.mesures.length === 0 ? (
-              <p className="text-sm text-slate-500 italic">
-                Cette fiche repose sur sa mesure clé principale.
+              <p className="text-sm text-slate-400 italic bg-purple-950/30 p-4 rounded-xl">
+                Cette fiche repose sur sa mesure clé principale ci-dessus.
               </p>
             ) : (
               <ol className="space-y-3">
                 {section.mesures.map((m, idx) => (
                   <li
                     key={idx}
-                    className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50/80 border border-slate-100/90 text-sm leading-relaxed"
+                    className="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-950/30 border border-purple-800/30 hover:border-purple-700/60 transition-colors text-sm leading-relaxed"
                   >
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-800 font-bold text-xs flex items-center justify-center mt-0.5">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md">
                       {idx + 1}
                     </span>
-                    <span className="text-slate-800 font-medium">
+                    <span className="text-slate-100 font-medium">
                       {m}
                     </span>
                   </li>
@@ -143,20 +147,21 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
           </div>
 
           {/* Profile tags */}
-          <div className="pt-2 border-t border-slate-100">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Profils citoyens concernés
+          <div className="pt-4 border-t border-purple-800/40">
+            <h4 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3">
+              Profils citoyens &amp; Thématiques concernés
             </h4>
             <div className="flex flex-wrap gap-2">
               {section.profiles.map(pid => {
                 const prof = profileMap.get(pid);
                 if (!prof) return null;
+                const colors = getProfileColor(pid);
                 return (
                   <span
                     key={pid}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium bg-purple-50 text-purple-800 px-3 py-1.5 rounded-lg border border-purple-100"
+                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border ${colors.bg} ${colors.text} ${colors.border}`}
                   >
-                    {renderProfileIcon(prof.icon, "w-3.5 h-3.5 text-purple-700")}
+                    {renderProfileIcon(prof.icon, "w-3.5 h-3.5")}
                     {prof.label}
                   </span>
                 );
@@ -166,13 +171,13 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
         </div>
 
         {/* Footer sticky bar */}
-        <div className="sticky bottom-0 bg-white border-t border-slate-100 px-6 py-3 flex items-center justify-between">
-          <span className="text-xs text-slate-500">
-            L'Avenir en commun • 2027
+        <div className="sticky bottom-0 bg-[#16062b] border-t border-purple-500/20 px-6 py-3.5 flex items-center justify-between">
+          <span className="text-xs text-purple-300/80 font-medium">
+            L'Avenir en commun • Jean-Luc Mélenchon 2027
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl transition-colors shadow-sm"
+            className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
           >
             Fermer la fiche
           </button>
