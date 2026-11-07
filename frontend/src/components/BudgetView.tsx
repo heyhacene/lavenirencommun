@@ -60,19 +60,31 @@ export const BudgetView: React.FC<BudgetViewProps> = ({ budget }) => {
       <div className="flex bg-slate-100 p-1.5 rounded-2xl">
         <button
           onClick={() => setActiveTab('depenses')}
-          className={lex-1 py-2.5 rounded-xl font-bold text-xs transition-all }
+          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            activeTab === 'depenses'
+              ? 'bg-white text-purple-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           Où va l'argent ? (Dépenses)
         </button>
         <button
           onClick={() => setActiveTab('recettes')}
-          className={lex-1 py-2.5 rounded-xl font-bold text-xs transition-all }
+          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            activeTab === 'recettes'
+              ? 'bg-white text-purple-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           D'où vient l'argent ? (Recettes)
         </button>
         <button
           onClick={() => setActiveTab('investissement')}
-          className={lex-1 py-2.5 rounded-xl font-bold text-xs transition-all }
+          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all ${
+            activeTab === 'investissement'
+              ? 'bg-white text-purple-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           Pôle Investissement
         </button>
@@ -103,7 +115,7 @@ export const BudgetView: React.FC<BudgetViewProps> = ({ budget }) => {
                     </div>
                   </div>
                   <IconChevronDown
-                    className={w-4 h-4 text-slate-400 transition-transform }
+                    className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                   />
                 </button>
 

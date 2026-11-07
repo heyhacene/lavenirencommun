@@ -34,25 +34,25 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
           className="flex items-center gap-1.5 font-bold text-purple-800 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
         >
           <span>📑 Sommaire interactif</span>
-          <IconChevronRight className={w-3.5 h-3.5 transition-transform } />
+          <IconChevronRight className={`w-3.5 h-3.5 transition-transform ${showToc ? 'rotate-90' : ''}`} />
         </button>
 
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
           <button
             onClick={() => setFontSize('normal')}
-            className={px-2 py-0.5 rounded font-bold }
+            className={`px-2 py-0.5 rounded font-bold ${fontSize === 'normal' ? 'bg-white text-purple-900 shadow-xs' : 'text-slate-500'}`}
           >
             A
           </button>
           <button
             onClick={() => setFontSize('large')}
-            className={px-2 py-0.5 rounded font-bold text-sm }
+            className={`px-2 py-0.5 rounded font-bold text-sm ${fontSize === 'large' ? 'bg-white text-purple-900 shadow-xs' : 'text-slate-500'}`}
           >
             A+
           </button>
           <button
             onClick={() => setFontSize('xlarge')}
-            className={px-2 py-0.5 rounded font-bold text-base }
+            className={`px-2 py-0.5 rounded font-bold text-base ${fontSize === 'xlarge' ? 'bg-white text-purple-900 shadow-xs' : 'text-slate-500'}`}
           >
             A++
           </button>
@@ -79,7 +79,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
               {data.parties.map(p => (
                 <div key={p.id} className="space-y-1">
                   <button
-                    onClick={() => scrollToAnchor(eader-)}
+                    onClick={() => scrollToAnchor(`reader-${p.id}`)}
                     className="w-full text-left font-black text-xs uppercase tracking-wider text-purple-900 bg-purple-50/70 p-2 rounded-lg block"
                   >
                     Partie {p.number} • {p.title}
@@ -88,7 +88,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
                     {p.chapters.map(c => (
                       <button
                         key={c.id}
-                        onClick={() => scrollToAnchor(eader-)}
+                        onClick={() => scrollToAnchor(`reader-${c.id}`)}
                         className="w-full text-left text-xs text-slate-700 hover:text-purple-700 hover:bg-slate-50 p-1.5 rounded-lg block"
                       >
                         Chapitre {c.number} • {c.title}
@@ -136,7 +136,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
         </h2>
 
         {data.introduction.preamble.length > 0 && (
-          <div className={space-y-4 text-slate-800 mb-8 font-serif }>
+          <div className={`space-y-4 text-slate-800 mb-8 font-serif ${textSizeClasses[fontSize]}`}>
             {data.introduction.preamble.map((para, i) => (
               <p key={i}>{para}</p>
             ))}
@@ -149,7 +149,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
               <h3 className="text-lg font-bold text-purple-900 mb-3">
                 {sec.title}
               </h3>
-              <div className={space-y-3.5 text-slate-700 }>
+              <div className={`space-y-3.5 text-slate-700 ${textSizeClasses[fontSize]}`}>
                 {sec.paragraphs.map((p, pIdx) => (
                   <p key={pIdx}>{p}</p>
                 ))}
@@ -161,7 +161,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
 
       {/* Continuous Parties & Chapters */}
       {data.parties.map(partie => (
-        <section key={partie.id} id={eader-} className="mb-10">
+        <section key={partie.id} id={`reader-${partie.id}`} className="mb-10">
           {/* Party Banner */}
           <div className="bg-gradient-to-r from-purple-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-md mb-6">
             <span className="text-xs font-bold uppercase tracking-widest text-purple-300">
@@ -184,7 +184,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
             {partie.chapters.map(chap => (
               <div
                 key={chap.id}
-                id={eader-}
+                id={`reader-${chap.id}`}
                 className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm"
               >
                 <div className="border-b border-slate-100 pb-4 mb-6">
@@ -217,7 +217,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
                       </h4>
 
                       {sec.intro && (
-                        <p className={	ext-slate-600 italic mb-4 }>
+                        <p className={`text-slate-600 italic mb-4 ${textSizeClasses[fontSize]}`}>
                           « {sec.intro} »
                         </p>
                       )}
@@ -227,7 +227,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
                           <span className="text-[10px] font-bold uppercase tracking-wider text-purple-900 block mb-1">
                             ★ Mesure Clé Phare
                           </span>
-                          <p className={ont-semibold text-purple-950 }>
+                          <p className={`font-semibold text-purple-950 ${textSizeClasses[fontSize]}`}>
                             {sec.mesureCle}
                           </p>
                         </div>
@@ -238,7 +238,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({ data, onOpenSectionModal
                           {sec.mesures.map((m, mIdx) => (
                             <li
                               key={mIdx}
-                              className={lex items-start gap-2.5 text-slate-800 }
+                              className={`flex items-start gap-2.5 text-slate-800 ${textSizeClasses[fontSize]}`}
                             >
                               <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center mt-0.5">
                                 {mIdx + 1}

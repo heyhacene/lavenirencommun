@@ -93,9 +93,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               <button
                 key={p.id}
                 onClick={() => setSelectedProfile(p.id)}
-                className={lex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium transition-all }
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium transition-all ${
+                  active
+                    ? 'bg-purple-700 text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100'
+                }`}
               >
-                {renderProfileIcon(p.icon, w-3 h-3 )}
+                {renderProfileIcon(p.icon, `w-3 h-3 ${active ? 'text-purple-200' : 'text-purple-600'}`)}
                 {p.label.split('&')[0].trim()}
               </button>
             );

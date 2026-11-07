@@ -84,7 +84,7 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-black tracking-tight">Programmer les Alertes</h2>
-              <p className="text-xs text-purple-200">Option C : Notifs Android & In-App combinées</p>
+              <p className="text-xs text-purple-200">Option C : Notifs Android &amp; In-App combinées</p>
             </div>
           </div>
           <button
@@ -105,10 +105,14 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
             </div>
             <button
               onClick={() => setEnabled(!enabled)}
-              className={elative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none }
+              className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                enabled ? 'bg-purple-700' : 'bg-slate-300'
+              }`}
             >
               <span
-                className={pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out }
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  enabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
               />
             </button>
           </div>
@@ -135,7 +139,11 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                           setHour(slot.h);
                           setMinute(slot.m);
                         }}
-                        className={py-2 px-3 text-xs font-bold rounded-xl border transition-all }
+                        className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all ${
+                          isSelected
+                            ? 'bg-purple-700 text-white border-purple-700 shadow-sm'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
                       >
                         {slot.label}
                       </button>
@@ -177,9 +185,13 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                       <button
                         key={p.id}
                         onClick={() => setProfile(p.id)}
-                        className={lex items-center gap-2 p-2.5 rounded-xl border text-left text-xs font-medium transition-all }
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-left text-xs font-medium transition-all ${
+                          active
+                            ? 'bg-purple-50 border-purple-600 text-purple-900 font-bold'
+                            : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50'
+                        }`}
                       >
-                        {renderProfileIcon(p.icon, w-4 h-4 flex-shrink-0 )}
+                        {renderProfileIcon(p.icon, `w-4 h-4 flex-shrink-0 ${active ? 'text-purple-700' : 'text-slate-500'}`)}
                         <span className="truncate">{p.label}</span>
                       </button>
                     );

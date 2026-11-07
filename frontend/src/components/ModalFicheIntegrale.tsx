@@ -22,7 +22,7 @@ export const ModalFicheIntegrale: React.FC<ModalFicheIntegraleProps> = ({
   const profileMap = new Map(profiles.map(p => [p.id, p]));
 
   const handleShare = async () => {
-    const textToShare = ${section.title}\n\nMesure clé :\n\n\nProgramme L'Avenir en commun 2027;
+    const textToShare = `${section.title}\n\nMesure clé :\n${section.mesureCle}\n\nProgramme L'Avenir en commun 2027`;
     if (navigator.share) {
       try {
         await navigator.share({

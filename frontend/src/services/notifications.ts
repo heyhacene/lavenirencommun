@@ -86,7 +86,7 @@ export async function scheduleDailyFicheAlert(
       notifications: [
         {
           id: NOTIFICATION_ID,
-          title: L'Avenir en commun • \,
+          title: `L'Avenir en commun • ${fiche.title}`,
           body: fiche.mesureCle || fiche.intro || 'Découvrez la mesure du jour du programme 2027.',
           schedule: {
             at: target,
@@ -102,7 +102,7 @@ export async function scheduleDailyFicheAlert(
       ]
     });
 
-    console.log(Notification scheduled for \ daily (Section: \));
+    console.log(`Notification scheduled for ${target.toLocaleTimeString()} daily (Section: ${fiche.title})`);
     return true;
   } catch (e) {
     console.warn('Could not schedule native notification:', e);
@@ -111,7 +111,7 @@ export async function scheduleDailyFicheAlert(
 }
 
 export async function triggerTestNotification(section: Section): Promise<boolean> {
-  const granted = await requestNotificationPermission();
+  await requestNotificationPermission();
   try {
     const testId = 999999;
     const testTime = new Date(Date.now() + 3000); // 3 seconds later
@@ -120,7 +120,7 @@ export async function triggerTestNotification(section: Section): Promise<boolean
       notifications: [
         {
           id: testId,
-          title: L'Avenir en commun • \,
+          title: `L'Avenir en commun • ${section.title}`,
           body: section.mesureCle || section.intro || 'Test de notification du programme 2027.',
           schedule: {
             at: testTime,

@@ -137,9 +137,13 @@ export default function App() {
                   <button
                     key={p.id}
                     onClick={() => setSelectedProfile(p.id)}
-                    className={lex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all }
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all ${
+                      active
+                        ? 'bg-purple-900 text-white shadow-sm'
+                        : 'bg-white text-slate-700 border border-slate-200/80 hover:bg-slate-100'
+                    }`}
                   >
-                    {renderProfileIcon(p.icon, w-3.5 h-3.5 )}
+                    {renderProfileIcon(p.icon, `w-3.5 h-3.5 ${active ? 'text-purple-200' : 'text-purple-700'}`)}
                     {p.label}
                   </button>
                 );
@@ -230,7 +234,9 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2 flex items-center justify-around shadow-lg">
         <button
           onClick={() => setActiveTab('fiches')}
-          className={lex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all }
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+            activeTab === 'fiches' ? 'text-purple-800 font-bold' : 'text-slate-400 hover:text-slate-600'
+          }`}
         >
           <IconCards className="w-5 h-5" />
           <span className="text-[10px]">Fiches</span>
@@ -246,7 +252,9 @@ export default function App() {
 
         <button
           onClick={() => setActiveTab('budget')}
-          className={lex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all }
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+            activeTab === 'budget' ? 'text-purple-800 font-bold' : 'text-slate-400 hover:text-slate-600'
+          }`}
         >
           <IconBudget className="w-5 h-5" />
           <span className="text-[10px]">Budget</span>
@@ -254,7 +262,9 @@ export default function App() {
 
         <button
           onClick={() => setActiveTab('plans')}
-          className={lex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all }
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+            activeTab === 'plans' ? 'text-purple-800 font-bold' : 'text-slate-400 hover:text-slate-600'
+          }`}
         >
           <IconPlans className="w-5 h-5" />
           <span className="text-[10px]">5 Plans</span>
@@ -262,7 +272,9 @@ export default function App() {
 
         <button
           onClick={() => setActiveTab('lecteur')}
-          className={lex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all }
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+            activeTab === 'lecteur' ? 'text-purple-800 font-bold' : 'text-slate-400 hover:text-slate-600'
+          }`}
         >
           <IconBookOpen className="w-5 h-5" />
           <span className="text-[10px]">Livre</span>

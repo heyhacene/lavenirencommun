@@ -38,7 +38,11 @@ export const PlansView: React.FC<PlansViewProps> = ({ plans }) => {
                 setSelectedPlanId(p.id);
                 setExpandedSection(0);
               }}
-              className={lex-shrink-0 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all }
+              className={`flex-shrink-0 px-4 py-2.5 rounded-2xl font-bold text-xs transition-all ${
+                active
+                  ? 'bg-purple-800 text-white shadow-md'
+                  : 'bg-white text-slate-700 border border-slate-200/80 hover:bg-slate-50'
+              }`}
             >
               {p.title.split('pour')[1]?.trim() || p.title.split('de')[1]?.trim() || p.title}
             </button>
@@ -77,7 +81,7 @@ export const PlansView: React.FC<PlansViewProps> = ({ plans }) => {
                       <h3 className="font-bold text-sm text-slate-900">{sub.title}</h3>
                     </div>
                     <IconChevronDown
-                      className={w-4 h-4 text-slate-400 transition-transform }
+                      className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                     />
                   </button>
 
