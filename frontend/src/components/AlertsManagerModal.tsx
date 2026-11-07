@@ -50,9 +50,12 @@ export const AlertsManagerModal = ({
 
   if (!isOpen) return null;
 
-  const handleGlobalToggle = () => {
+  const handleGlobalToggle = async () => {
     const next = !globalEnabled;
     setGlobalEnabled(next);
+    if (next) {
+      await requestNotificationPermission();
+    }
   };
 
   const handleToggleSchedule = (id: string) => {

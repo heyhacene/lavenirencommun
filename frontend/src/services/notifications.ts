@@ -3,6 +3,7 @@ import type { MultiAlertConfig, AlertSchedule, Section } from '../types/programm
 
 const STORAGE_KEY_MULTI_ALERT = 'aec_multi_alerts_v2';
 const STORAGE_KEY_LEGACY = 'aec_alert_config_v1';
+export const NOTIFICATION_CHANNEL_ID = 'aec_programme_alerts';
 
 export const defaultSchedules: AlertSchedule[] = [
   {
@@ -87,21 +88,12 @@ export function registerNotificationTargetListener(
   };
 }
 
-// Early top-level listener for cold start taps
-try {
-  LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
-    console.log('[AEC] localNotificationActionPerformed top-level event:', action);
-    const target = extractNotificationTarget(action.notification);
-    if (target) {
-      if (notificationTargetListener) {
-        notificationTargetListener(target);
-      } else {
-        pendingNotificationTarget = target;
-      }
-    }
-  });
-} catch (e) {
-  console.warn('[AEC] Could not register top-level localNotificationActionPerformed listener:', e);
+export function dispatchNotificationTarget(target: NotificationPayloadTarget) {
+  if (notificationTargetListener) {
+    notificationTargetListener(target);
+  } else {
+    pendingNotificationTarget = target;
+  }
 }
 
 export function hashStringToNumber(str: string): number {
@@ -161,6 +153,21 @@ export function saveMultiAlertConfig(config: MultiAlertConfig): void {
   }
 }
 
+export async function ensureNotificationChannel(): Promise<void> {
+  try {
+    await LocalNotifications.createChannel({
+      id: NOTIFICATION_CHANNEL_ID,
+      name: "Alertes L'Avenir en commun",
+      description: "Rappels et notifications des mesures officielles du programme 2027",
+      importance: 5, // High importance (banner, vibration, heads-up)
+      visibility: 1, // Public on lockscreen
+      vibration: true
+    });
+  } catch (e) {
+    console.warn('[AEC] Could not create notification channel:', e);
+  }
+}
+
 export async function requestNotificationPermission(): Promise<boolean> {
   try {
     const status = await LocalNotifications.checkPermissions();
@@ -180,6 +187,8 @@ export async function scheduleAllAlerts(
   sections: Section[]
 ): Promise<boolean> {
   saveMultiAlertConfig(config);
+
+  await ensureNotificationChannel();
 
   try {
     const pending = await LocalNotifications.getPending();
@@ -227,13 +236,13 @@ export async function scheduleAllAlerts(
       id: notifId,
       title: `L'Avenir en commun • ${fiche.title}`,
       body: fiche.mesureCle || fiche.intro || 'Découvrez une mesure officielle du programme 2027.',
+      channelId: NOTIFICATION_CHANNEL_ID,
       schedule: {
         at: target,
         allowWhileIdle: true,
         repeats: true,
         every: 'day'
       },
-      sound: 'beep.wav',
       extra: {
         sectionId: fiche.id,
         globalIndex: fiche.globalIndex,
@@ -247,31 +256,29 @@ export async function scheduleAllAlerts(
 
   try {
     await LocalNotifications.schedule({ notifications: notifsToSchedule });
-    console.log(`Scheduled ${notifsToSchedule.length} notifications successfully.`);
+    console.log(`[AEC] Scheduled ${notifsToSchedule.length} notifications successfully.`);
     return true;
   } catch (e) {
-    console.warn('Could not schedule native notifications:', e);
+    console.warn('[AEC] Could not schedule native notifications:', e);
     return false;
   }
 }
 
 export async function triggerTestNotification(section: Section): Promise<boolean> {
   await requestNotificationPermission();
+  await ensureNotificationChannel();
+
   try {
     const testId = 999999;
-    const testTime = new Date(Date.now() + 2500); // 2.5 seconds later
 
+    // Post immediately so Android displays it right away in notification center
     await LocalNotifications.schedule({
       notifications: [
         {
           id: testId,
           title: `L'Avenir en commun • ${section.title}`,
           body: section.mesureCle || section.intro || 'Test de notification du programme 2027.',
-          schedule: {
-            at: testTime,
-            allowWhileIdle: true
-          },
-          sound: 'beep.wav',
+          channelId: NOTIFICATION_CHANNEL_ID,
           extra: {
             sectionId: section.id,
             globalIndex: section.globalIndex,
@@ -280,9 +287,10 @@ export async function triggerTestNotification(section: Section): Promise<boolean
         }
       ]
     });
+    console.log('[AEC] Test notification triggered immediately for:', section.title);
     return true;
   } catch (e) {
-    console.warn('Failed to schedule test notification:', e);
+    console.error('[AEC] Failed to trigger test notification:', e);
     return false;
   }
 }

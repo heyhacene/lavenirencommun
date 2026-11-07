@@ -4,7 +4,10 @@ import {
   loadMultiAlertConfig,
   scheduleAllAlerts,
   registerNotificationTargetListener,
-  extractNotificationTarget
+  extractNotificationTarget,
+  ensureNotificationChannel,
+  requestNotificationPermission,
+  dispatchNotificationTarget
 } from './services/notifications';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { CardFiche } from './components/CardFiche';
@@ -29,7 +32,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.12';
+const APP_CURRENT_VERSION = 'v1.0.13';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -80,8 +83,11 @@ export default function App() {
     }
   };
 
-  // Load programme.json on mount
+  // Load programme.json on mount & setup notification channel
   useEffect(() => {
+    ensureNotificationChannel();
+    requestNotificationPermission();
+
     fetch('/data/programme.json')
       .then(res => res.json())
       .then((progData: ProgrammeData) => {
@@ -114,31 +120,32 @@ export default function App() {
 
   // Listen to notification clicks (both cold start and foreground/background)
   useEffect(() => {
-    if (!data) return;
+    let directHandle: any;
 
-    // Listen to notification target dispatched from service (handles buffered cold-start taps)
+    const setupListeners = async () => {
+      try {
+        directHandle = await LocalNotifications.addListener('localNotificationActionPerformed', action => {
+          console.log('[AEC] Direct localNotificationActionPerformed received in App:', action);
+          const target = extractNotificationTarget(action.notification);
+          if (target && dataRef.current) {
+            openSectionFromTarget(target, dataRef.current.sections);
+          } else if (target) {
+            dispatchNotificationTarget(target);
+          }
+        });
+      } catch (e) {
+        console.warn('[AEC] Could not attach localNotificationActionPerformed listener:', e);
+      }
+    };
+
+    setupListeners();
+
     const unregister = registerNotificationTargetListener(target => {
       console.log('[AEC] Notification target listener triggered:', target);
-      openSectionFromTarget(target, data.sections);
+      if (dataRef.current) {
+        openSectionFromTarget(target, dataRef.current.sections);
+      }
     });
-
-    // Also register a direct localNotificationActionPerformed listener
-    let directHandle: any;
-    try {
-      LocalNotifications.addListener('localNotificationActionPerformed', action => {
-        console.log('[AEC] Direct localNotificationActionPerformed received:', action);
-        const target = extractNotificationTarget(action.notification);
-        if (target) {
-          openSectionFromTarget(target, data.sections);
-        }
-      }).then(h => {
-        directHandle = h;
-      }).catch(err => {
-        console.warn('[AEC] Could not register direct localNotificationActionPerformed:', err);
-      });
-    } catch (e) {
-      // Not on native device
-    }
 
     return () => {
       unregister();
@@ -146,7 +153,7 @@ export default function App() {
         directHandle.remove();
       }
     };
-  }, [data]);
+  }, []);
 
   // Back button handling: native Android back button + browser history popstate
   useEffect(() => {
