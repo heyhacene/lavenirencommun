@@ -1,0 +1,118 @@
+﻿name: Build Android APK (Capacitor)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build & Release Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Java (Temurin JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK Environment
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Install dependencies (Frontend)
+        working-directory: frontend
+        run: npm install
+
+      - name: Build web application
+        working-directory: frontend
+        run: npm run build
+
+      - name: Add/Sync Capacitor Android
+        working-directory: frontend
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      - name: Make Gradle executable
+        run: chmod +x frontend/android/gradlew
+
+      - name: Build Android APK (Release)
+        working-directory: frontend/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Sign & Align APK
+        run: |
+          UNSIGNED_APK="frontend/android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          if [ ! -f "$UNSIGNED_APK" ]; then
+            UNSIGNED_APK="frontend/android/app/build/outputs/apk/debug/app-debug.apk"
+          fi
+
+          APKSIGNER=$(find $ANDROID_SDK_ROOT/build-tools $ANDROID_HOME/build-tools /usr/local/lib/android/sdk/build-tools -name apksigner 2>/dev/null | sort -V | tail -n 1)
+          ZIPALIGN=$(find $ANDROID_SDK_ROOT/build-tools $ANDROID_HOME/build-tools /usr/local/lib/android/sdk/build-tools -name zipalign 2>/dev/null | sort -V | tail -n 1)
+
+          if [ -n "$ZIPALIGN" ] && ! $ZIPALIGN -c 4 "$UNSIGNED_APK"; then
+            $ZIPALIGN -p -f 4 "$UNSIGNED_APK" aligned.apk
+            UNSIGNED_APK="aligned.apk"
+          fi
+
+          KEYSTORE="keystore/app.keystore"
+          $APKSIGNER sign \
+            --ks "$KEYSTORE" \
+            --ks-key-alias "keonote" \
+            --ks-pass "pass:keonotepassword" \
+            --key-pass "pass:keonotepassword" \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out lavenirencommun.apk \
+            "$UNSIGNED_APK"
+
+          $APKSIGNER verify --verbose lavenirencommun.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lavenirencommun-APK
+          path: lavenirencommun.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "L'Avenir en commun v1.0.${{ github.run_number }}"
+          body: |
+            ### 📱 Application Officielle L'Avenir en commun (Programme 2027)
+            - **111 fiches thématiques** condensées avec version intégrale
+            - **1 069 mesures officielles** (dont 107 mesures clés phares)
+            - **Moteur de recherche instantané** et filtrage par profil citoyen
+            - **Option C d'alertes** : notifications natives Android programmables + popups in-app
+            - **Chiffrage budgétaire 2027** (+106,4 Md€ / +81,7 Md€ / 100 Md€) & 5 Plans sectoriels
+            - **Lecteur continu** du livre avec sommaire interactif
+
+            APK signé et aligné, prêt à être installé directement sur votre smartphone ou tablette Android.
+          files: |
+            lavenirencommun.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

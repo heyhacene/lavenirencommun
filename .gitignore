@@ -1,0 +1,11 @@
+﻿node_modules
+dist
+dist-ssr
+*.local
+.env
+.DS_Store
+Thumbs.db
+frontend/node_modules
+frontend/dist
+frontend/android/app/build
+frontend/android/.gradle
