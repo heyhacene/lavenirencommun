@@ -33,6 +33,77 @@ export const defaultMultiAlertConfig: MultiAlertConfig = {
   schedules: defaultSchedules
 };
 
+export interface NotificationPayloadTarget {
+  sectionId?: string;
+  globalIndex?: number;
+  title?: string;
+}
+
+let pendingNotificationTarget: NotificationPayloadTarget | null = null;
+let notificationTargetListener: ((target: NotificationPayloadTarget) => void) | null = null;
+
+export function extractNotificationTarget(notification: any): NotificationPayloadTarget | null {
+  if (!notification) return null;
+  let sectionId: string | undefined;
+  let globalIndex: number | undefined;
+  let title: string | undefined = notification.title;
+
+  const extra = notification.extra;
+  if (extra) {
+    if (typeof extra === 'string') {
+      try {
+        const parsed = JSON.parse(extra);
+        sectionId = parsed.sectionId;
+        globalIndex = parsed.globalIndex ? Number(parsed.globalIndex) : undefined;
+        if (parsed.title) title = parsed.title;
+      } catch {
+        sectionId = extra;
+      }
+    } else if (typeof extra === 'object') {
+      sectionId = extra.sectionId;
+      globalIndex = extra.globalIndex ? Number(extra.globalIndex) : undefined;
+      if (extra.title) title = extra.title;
+    }
+  }
+
+  return { sectionId, globalIndex, title };
+}
+
+export function registerNotificationTargetListener(
+  listener: (target: NotificationPayloadTarget) => void
+): () => void {
+  notificationTargetListener = listener;
+  if (pendingNotificationTarget) {
+    const target = pendingNotificationTarget;
+    pendingNotificationTarget = null;
+    setTimeout(() => {
+      listener(target);
+    }, 200);
+  }
+  return () => {
+    if (notificationTargetListener === listener) {
+      notificationTargetListener = null;
+    }
+  };
+}
+
+// Early top-level listener for cold start taps
+try {
+  LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
+    console.log('[AEC] localNotificationActionPerformed top-level event:', action);
+    const target = extractNotificationTarget(action.notification);
+    if (target) {
+      if (notificationTargetListener) {
+        notificationTargetListener(target);
+      } else {
+        pendingNotificationTarget = target;
+      }
+    }
+  });
+} catch (e) {
+  console.warn('[AEC] Could not register top-level localNotificationActionPerformed listener:', e);
+}
+
 export function hashStringToNumber(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -111,7 +182,6 @@ export async function scheduleAllAlerts(
   saveMultiAlertConfig(config);
 
   try {
-    // 1. Cancel all existing pending notifications
     const pending = await LocalNotifications.getPending();
     if (pending.notifications && pending.notifications.length > 0) {
       await LocalNotifications.cancel({ notifications: pending.notifications });
@@ -166,6 +236,8 @@ export async function scheduleAllAlerts(
       sound: 'beep.wav',
       extra: {
         sectionId: fiche.id,
+        globalIndex: fiche.globalIndex,
+        title: fiche.title,
         scheduleId: schedule.id
       }
     });
@@ -201,7 +273,9 @@ export async function triggerTestNotification(section: Section): Promise<boolean
           },
           sound: 'beep.wav',
           extra: {
-            sectionId: section.id
+            sectionId: section.id,
+            globalIndex: section.globalIndex,
+            title: section.title
           }
         }
       ]

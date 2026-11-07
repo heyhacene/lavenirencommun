@@ -1,6 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { ProgrammeData, Section, MultiAlertConfig } from './types/programme';
-import { loadMultiAlertConfig, scheduleAllAlerts } from './services/notifications';
+import {
+  loadMultiAlertConfig,
+  scheduleAllAlerts,
+  registerNotificationTargetListener,
+  extractNotificationTarget
+} from './services/notifications';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { CardFiche } from './components/CardFiche';
 import { ModalFicheIntegrale } from './components/ModalFicheIntegrale';
 import { SearchModal } from './components/SearchModal';
@@ -23,7 +29,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.11';
+const APP_CURRENT_VERSION = 'v1.0.12';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -37,6 +43,42 @@ export default function App() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
   const [multiAlertConfig, setMultiAlertConfig] = useState<MultiAlertConfig>(loadMultiAlertConfig());
+  const dataRef = useRef<ProgrammeData | null>(null);
+
+  // Helper to open a section by ID, globalIndex or title
+  const openSectionFromTarget = (
+    target: { sectionId?: string; globalIndex?: number; title?: string },
+    sectionsList: Section[]
+  ) => {
+    if (!sectionsList || sectionsList.length === 0) return;
+
+    const found = sectionsList.find(s => {
+      if (target.sectionId && s.id === target.sectionId) return true;
+      if (target.globalIndex && s.globalIndex === target.globalIndex) return true;
+      if (target.title) {
+        const cleanNotifTitle = target.title.replace(/^L'Avenir en commun •\s*/i, '').trim().toLowerCase();
+        const cleanSecTitle = s.title.trim().toLowerCase();
+        if (
+          cleanNotifTitle === cleanSecTitle ||
+          cleanNotifTitle.includes(cleanSecTitle) ||
+          cleanSecTitle.includes(cleanNotifTitle)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (found) {
+      console.log('[AEC] Opening section from notification tap:', found.title);
+      setSettingsOpen(false);
+      setAlertsManagerOpen(false);
+      setUpdateModalOpen(false);
+      setSearchModalOpen(false);
+      setActiveTab('fiches');
+      setSelectedSectionForModal(found);
+    }
+  };
 
   // Load programme.json on mount
   useEffect(() => {
@@ -44,6 +86,7 @@ export default function App() {
       .then(res => res.json())
       .then((progData: ProgrammeData) => {
         setData(progData);
+        dataRef.current = progData;
         setLoading(false);
 
         // Setup notification background task
@@ -68,6 +111,42 @@ export default function App() {
         setLoading(false);
       });
   }, []);
+
+  // Listen to notification clicks (both cold start and foreground/background)
+  useEffect(() => {
+    if (!data) return;
+
+    // Listen to notification target dispatched from service (handles buffered cold-start taps)
+    const unregister = registerNotificationTargetListener(target => {
+      console.log('[AEC] Notification target listener triggered:', target);
+      openSectionFromTarget(target, data.sections);
+    });
+
+    // Also register a direct localNotificationActionPerformed listener
+    let directHandle: any;
+    try {
+      LocalNotifications.addListener('localNotificationActionPerformed', action => {
+        console.log('[AEC] Direct localNotificationActionPerformed received:', action);
+        const target = extractNotificationTarget(action.notification);
+        if (target) {
+          openSectionFromTarget(target, data.sections);
+        }
+      }).then(h => {
+        directHandle = h;
+      }).catch(err => {
+        console.warn('[AEC] Could not register direct localNotificationActionPerformed:', err);
+      });
+    } catch (e) {
+      // Not on native device
+    }
+
+    return () => {
+      unregister();
+      if (directHandle && directHandle.remove) {
+        directHandle.remove();
+      }
+    };
+  }, [data]);
 
   // Back button handling: native Android back button + browser history popstate
   useEffect(() => {
