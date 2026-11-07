@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { Plan } from '../types/programme';
 import { IconChevronDown } from './Icons';
 
@@ -15,9 +15,10 @@ export const PlansView = ({ plans }: PlansViewProps) => {
   return (
     <div className="max-w-3xl mx-auto pb-24 space-y-6 text-white">
       {/* Header */}
-      <div className="stitch-hero">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2b0854] via-[#1d0638] to-[#120025] rounded-3xl p-6 sm:p-8 border border-purple-500/40 shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="relative z-10">
-          <span className="inline-flex items-center gap-2 bg-purple-950/80 border border-purple-500/40 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider text-amber-300 mb-2">
+          <span className="inline-flex items-center gap-2 bg-purple-900/80 border border-purple-500/40 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider text-amber-300 mb-2">
             Feuilles de Route Sectorielles
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-white mb-2 leading-tight">
@@ -41,7 +42,11 @@ export const PlansView = ({ plans }: PlansViewProps) => {
                 setSelectedPlanId(p.id);
                 setExpandedSection(0);
               }}
-              className={`stitch-chip ${active ? 'stitch-chip-active' : 'stitch-chip-inactive'}`}
+              className={`flex-shrink-0 px-4 py-3 rounded-2xl font-black text-xs transition-all border ${
+                active
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-lg scale-[1.02]'
+                  : 'bg-[#18082f] text-slate-300 border-purple-900/50 hover:border-purple-600/60 hover:text-white'
+              }`}
             >
               {shortLabel}
             </button>
@@ -52,50 +57,45 @@ export const PlansView = ({ plans }: PlansViewProps) => {
       {/* Current Plan Detail */}
       {currentPlan && (
         <div className="space-y-4">
-          <div className="stitch-card">
-            <span className="text-xs font-black uppercase tracking-widest text-amber-400 block mb-1">
-              Plan Sectoriel Prioritaire
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black text-white leading-tight mb-2">
+          <div className="glass-panel rounded-3xl p-6 border border-purple-500/30 shadow-lg">
+            <h2 className="text-lg sm:text-xl font-black text-white mb-1.5 leading-snug">
               {currentPlan.title}
             </h2>
-            <p className="text-xs sm:text-sm text-purple-200 leading-relaxed">
-              {currentPlan.intro}
+            <p className="text-xs text-purple-300 font-semibold">
+              {currentPlan.subsections.length} axes d'intervention prioritaires
             </p>
           </div>
 
-          {/* Sections of the plan */}
           <div className="space-y-3">
-            {currentPlan.sections.map((sec, idx) => {
+            {currentPlan.subsections.map((sub, idx) => {
               const isExpanded = expandedSection === idx;
               return (
                 <div
                   key={idx}
-                  className="stitch-card overflow-hidden"
+                  className="glass-panel rounded-2xl border border-purple-500/20 overflow-hidden shadow-md"
                 >
                   <button
                     onClick={() => setExpandedSection(isExpanded ? null : idx)}
-                    className="w-full p-4 flex items-center justify-between text-left transition-colors"
+                    className="w-full p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors"
                   >
-                    <span className="font-extrabold text-sm sm:text-base text-white pr-4">
-                      {sec.subtitle}
-                    </span>
+                    <div className="flex items-center gap-3.5">
+                      <span className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center shadow-md">
+                        {idx + 1}
+                      </span>
+                      <h3 className="font-extrabold text-sm sm:text-base text-white">{sub.title}</h3>
+                    </div>
                     <IconChevronDown
-                      size={16}
-                      className={`text-purple-400 transition-transform ${isExpanded ? 'rotate-180 text-amber-300' : ''}`}
+                      className={`w-4 h-4 text-purple-400 transition-transform ${isExpanded ? 'rotate-180 text-amber-300' : ''}`}
                     />
                   </button>
 
                   {isExpanded && (
-                    <div className="px-4 pb-4 pt-1 border-t border-purple-900/50 bg-[#120324]/80">
-                      <ul className="space-y-2 mt-2">
-                        {sec.points.map((pt, pIdx) => (
-                          <li key={pIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">
-                            <span className="text-amber-400 font-black mt-0.5">•</span>
-                            <span>{pt}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="px-5 pb-5 pt-2 border-t border-purple-900/50 bg-[#120324]/80 space-y-3">
+                      {sub.paragraphs.map((para, pIdx) => (
+                        <p key={pIdx} className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                          {para}
+                        </p>
+                      ))}
                     </div>
                   )}
                 </div>
