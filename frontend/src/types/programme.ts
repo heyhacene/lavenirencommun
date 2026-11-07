@@ -1,4 +1,4 @@
-﻿export interface Profile {
+export interface Profile {
   id: string;
   label: string;
   icon: string;
@@ -115,6 +115,20 @@ export interface ProgrammeData {
   sections: Section[];
   budget: Budget;
   plans: Plan[];
+}
+
+export interface AlertSchedule {
+  id: string;
+  enabled: boolean;
+  time: string; // "HH:MM", e.g. "08:30"
+  label: string;
+  profile: string; // profile id e.g. "tous", "retraites"
+}
+
+export interface MultiAlertConfig {
+  globalEnabled: boolean;
+  schedules: AlertSchedule[];
+  lastTriggerTimestamp?: number;
 }
 
 export interface AlertConfig {

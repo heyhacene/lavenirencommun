@@ -15,7 +15,7 @@ export const InAppAlertToast = ({
   if (!section) return null;
 
   return (
-    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[420px] z-50">
+    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[420px] z-[110]">
       <div className="bg-[#170530]/95 backdrop-blur-xl text-white p-4.5 rounded-2xl shadow-2xl border-2 border-purple-500/50 flex flex-col gap-3 relative overflow-hidden">
         {/* Top ambient glow */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none -mr-10 -mt-10" />

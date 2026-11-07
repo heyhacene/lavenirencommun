@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "lavenirencommun",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.11",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.0.0",
     "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "@capacitor/local-notifications": "^8.0.0",

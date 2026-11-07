@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import type { Section, Profile } from '../types/programme';
-import { IconClose, IconCheck, IconShare, IconBell, IconStar, renderProfileIcon, getProfileColor } from './Icons';
+import {
+  IconClose,
+  IconCheck,
+  IconShare,
+  IconBell,
+  IconStar,
+  IconArrowLeft,
+  renderProfileIcon,
+  getProfileColor
+} from './Icons';
 
 interface ModalFicheIntegraleProps {
   section: Section | null;
   profiles: Profile[];
   onClose: () => void;
+  onSelectCategory?: (profileId: string) => void;
   onSetAlertForFiche?: (section: Section) => void;
 }
 
@@ -13,6 +23,7 @@ export const ModalFicheIntegrale = ({
   section,
   profiles,
   onClose,
+  onSelectCategory,
   onSetAlertForFiche
 }: ModalFicheIntegraleProps) => {
   const [copied, setCopied] = useState(false);
@@ -40,18 +51,28 @@ export const ModalFicheIntegrale = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md">
-      {/* Backdrop click */}
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md">
+      {/* Backdrop click to close */}
       <div className="fixed inset-0" onClick={onClose} />
 
       <div className="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-[#140626] border border-purple-500/40 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 text-white">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-20 bg-[#16062b]/95 backdrop-blur-md px-6 py-4 border-b border-purple-500/20 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full shadow-sm">
-              FICHE #{section.globalIndex}
+        {/* Sticky Header with Back Button and Large Close Cross */}
+        <div className="sticky top-0 z-20 bg-[#16062b]/95 backdrop-blur-md px-4 sm:px-6 py-3.5 border-b border-purple-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {/* Prominent Back Button */}
+            <button
+              onClick={onClose}
+              className="px-3 py-1.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 hover:text-white flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95"
+              title="Retour aux fiches"
+            >
+              <IconArrowLeft size={16} />
+              <span>Retour</span>
+            </button>
+
+            <span className="text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2.5 py-1 rounded-full shadow-sm">
+              #{section.globalIndex}
             </span>
-            <span className="text-xs text-purple-300 font-semibold truncate max-w-[200px]">
+            <span className="text-xs text-purple-300 font-semibold truncate max-w-[150px] sm:max-w-[240px]">
               Partie {section.partieNumber} • {section.chapitreTitle}
             </span>
           </div>
@@ -61,7 +82,7 @@ export const ModalFicheIntegrale = ({
               <button
                 onClick={() => onSetAlertForFiche(section)}
                 title="Tester l'alerte sur cette fiche"
-                className="p-2 text-purple-300 hover:text-amber-300 hover:bg-purple-900/60 rounded-full transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-purple-300 hover:text-amber-300 hover:bg-purple-900/60 rounded-full transition-colors active:scale-95"
               >
                 <IconBell size={18} />
               </button>
@@ -69,21 +90,24 @@ export const ModalFicheIntegrale = ({
             <button
               onClick={handleShare}
               title="Partager"
-              className="p-2 text-purple-300 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-purple-300 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors active:scale-95"
             >
               {copied ? <IconCheck size={18} className="text-emerald-400" /> : <IconShare size={18} />}
             </button>
+
+            {/* Large, Easy-to-Tap Close Cross (44px target) */}
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white hover:bg-purple-900/60 rounded-full transition-colors"
+              className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white transition-colors ml-1"
+              title="Fermer la fiche"
             >
-              <IconClose size={20} />
+              <IconClose size={22} />
             </button>
           </div>
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto px-6 py-6 space-y-6">
+        <div className="overflow-y-auto px-6 py-6 space-y-6 flex-1">
           {/* Breadcrumb info */}
           <div className="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-2">
             <span>Partie {section.partieNumber} : {section.partieTitle}</span>
@@ -146,38 +170,49 @@ export const ModalFicheIntegrale = ({
             )}
           </div>
 
-          {/* Profile tags */}
+          {/* CLICKABLE CATEGORY / PROFILE TAGS (User requirement) */}
           <div className="pt-4 border-t border-purple-800/40">
-            <h4 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3">
-              Profils citoyens &amp; Thématiques concernés
-            </h4>
+            <div className="flex items-center justify-between mb-2.5">
+              <h4 className="text-xs font-black uppercase tracking-wider text-purple-400">
+                Catégories &amp; Thématiques rattachées
+              </h4>
+              <span className="text-[11px] text-purple-300/70 italic">
+                Cliquez sur un thème pour voir ses fiches
+              </span>
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {section.profiles.map(pid => {
                 const prof = profileMap.get(pid);
                 if (!prof) return null;
                 const colors = getProfileColor(pid);
                 return (
-                  <span
+                  <button
                     key={pid}
-                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border ${colors.bg} ${colors.text} ${colors.border}`}
+                    onClick={() => onSelectCategory?.(pid)}
+                    className={`inline-flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border ${colors.bg} ${colors.text} ${colors.border} hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer group`}
+                    title={`Explorer toutes les fiches du thème « ${prof.label} »`}
                   >
-                    {renderProfileIcon(prof.icon, "w-3.5 h-3.5")}
-                    {prof.label}
-                  </span>
+                    {renderProfileIcon(prof.icon, "w-4 h-4")}
+                    <span>{prof.label}</span>
+                    <span className="text-[11px] opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                      →
+                    </span>
+                  </button>
                 );
               })}
             </div>
           </div>
         </div>
 
-        {/* Footer sticky bar */}
-        <div className="sticky bottom-0 bg-[#16062b] border-t border-purple-500/20 px-6 py-3.5 flex items-center justify-between">
+        {/* Footer sticky bar with prominent, functioning button */}
+        <div className="sticky bottom-0 bg-[#16062b] border-t border-purple-500/20 px-6 py-4 flex items-center justify-between pb-[max(1rem,env(safe-area-inset-bottom,16px))]">
           <span className="text-xs text-purple-300/80 font-medium">
-            L'Avenir en commun • Jean-Luc Mélenchon 2027
+            L'Avenir en commun • 2027
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-95"
           >
             Fermer la fiche
           </button>

@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { ProgrammeData, Section, AlertConfig } from './types/programme';
-import { loadAlertConfig, scheduleDailyFicheAlert } from './services/notifications';
+import type { ProgrammeData, Section, MultiAlertConfig } from './types/programme';
+import { loadMultiAlertConfig, scheduleAllAlerts } from './services/notifications';
 import { CardFiche } from './components/CardFiche';
 import { ModalFicheIntegrale } from './components/ModalFicheIntegrale';
 import { SearchModal } from './components/SearchModal';
-import { AlertSettingsModal } from './components/AlertSettingsModal';
+import { AlertsManagerModal } from './components/AlertsManagerModal';
+import { SettingsModal } from './components/SettingsModal';
+import { UpdateModal } from './components/UpdateModal';
 import { InAppAlertToast } from './components/InAppAlertToast';
 import { ReaderView } from './components/ReaderView';
 import { BudgetView } from './components/BudgetView';
@@ -12,6 +14,7 @@ import { PlansView } from './components/PlansView';
 import {
   IconSearch,
   IconBell,
+  IconSettings,
   IconCards,
   IconBudget,
   IconPlans,
@@ -20,6 +23,8 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
+const APP_CURRENT_VERSION = 'v1.0.11';
+
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,9 +32,11 @@ export default function App() {
   const [selectedProfile, setSelectedProfile] = useState<string>('tous');
   const [selectedSectionForModal, setSelectedSectionForModal] = useState<Section | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [alertSettingsOpen, setAlertSettingsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [alertsManagerOpen, setAlertsManagerOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
-  const [alertConfig, setAlertConfig] = useState<AlertConfig>(loadAlertConfig());
+  const [multiAlertConfig, setMultiAlertConfig] = useState<MultiAlertConfig>(loadMultiAlertConfig());
 
   // Load programme.json on mount
   useEffect(() => {
@@ -40,23 +47,19 @@ export default function App() {
         setLoading(false);
 
         // Setup notification background task
-        const cfg = loadAlertConfig();
-        scheduleDailyFicheAlert(cfg, progData.sections);
+        const cfg = loadMultiAlertConfig();
+        scheduleAllAlerts(cfg, progData.sections);
 
         // Check if an in-app alert should pop on launch
         const lastSeenDate = localStorage.getItem('aec_last_popup_date');
         const todayStr = new Date().toDateString();
-        if (cfg.enabled && lastSeenDate !== todayStr) {
-          const candidates = cfg.profile === 'tous'
-            ? progData.sections
-            : progData.sections.filter(s => s.profiles.includes(cfg.profile));
-          const pool = candidates.length > 0 ? candidates : progData.sections;
-          const randomSec = pool[Math.floor(Math.random() * pool.length)];
+        if (cfg.globalEnabled && lastSeenDate !== todayStr && progData.sections.length > 0) {
+          const randomSec = progData.sections[Math.floor(Math.random() * progData.sections.length)];
           if (randomSec) {
             setTimeout(() => {
               setInAppToastSection(randomSec);
               localStorage.setItem('aec_last_popup_date', todayStr);
-            }, 1500);
+            }, 1200);
           }
         }
       })
@@ -66,12 +69,87 @@ export default function App() {
       });
   }, []);
 
+  // Back button handling: native Android back button + browser history popstate
+  useEffect(() => {
+    const isAnyModalOpen = Boolean(
+      selectedSectionForModal ||
+      searchModalOpen ||
+      alertsManagerOpen ||
+      settingsOpen ||
+      updateModalOpen
+    );
+
+    if (isAnyModalOpen) {
+      window.history.pushState({ modalOpen: true }, '');
+    }
+
+    const handlePopState = () => {
+      if (selectedSectionForModal) {
+        setSelectedSectionForModal(null);
+      } else if (alertsManagerOpen) {
+        setAlertsManagerOpen(false);
+      } else if (updateModalOpen) {
+        setUpdateModalOpen(false);
+      } else if (settingsOpen) {
+        setSettingsOpen(false);
+      } else if (searchModalOpen) {
+        setSearchModalOpen(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen]);
+
+  // Native Capacitor back button listener
+  useEffect(() => {
+    let removeListener: (() => void) | undefined;
+
+    const setupCapacitorBack = async () => {
+      try {
+        const { App: CapApp } = await import('@capacitor/app');
+        const handle = await CapApp.addListener('backButton', ({ canGoBack }) => {
+          if (selectedSectionForModal) {
+            setSelectedSectionForModal(null);
+          } else if (alertsManagerOpen) {
+            setAlertsManagerOpen(false);
+          } else if (updateModalOpen) {
+            setUpdateModalOpen(false);
+          } else if (settingsOpen) {
+            setSettingsOpen(false);
+          } else if (searchModalOpen) {
+            setSearchModalOpen(false);
+          } else if (activeTab !== 'fiches') {
+            setActiveTab('fiches');
+          } else if (canGoBack) {
+            window.history.back();
+          } else {
+            CapApp.exitApp();
+          }
+        });
+        removeListener = () => handle.remove();
+      } catch (e) {
+        // Native Capacitor App plugin not available in browser
+      }
+    };
+
+    setupCapacitorBack();
+
+    return () => {
+      if (removeListener) removeListener();
+    };
+  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, activeTab]);
+
   // Filtered fiches for the main card list
   const filteredSections = useMemo(() => {
     if (!data) return [];
     if (selectedProfile === 'tous') return data.sections;
-    return data.sections.filter(s => s.profiles.includes(selectedProfile));
+    return data.sections.filter(s => s.profiles && s.profiles.includes(selectedProfile));
   }, [data, selectedProfile]);
+
+  const activeAlertsCount = multiAlertConfig.globalEnabled
+    ? multiAlertConfig.schedules.filter(s => s.enabled).length
+    : 0;
 
   if (loading || !data) {
     return (
@@ -96,7 +174,7 @@ export default function App() {
           </p>
           <div className="mt-6 flex items-center gap-2 text-xs text-purple-300/80 bg-purple-950/60 px-4 py-2 rounded-full border border-purple-500/20">
             <div className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
-            <span>Chargement des 1 069 mesures & 111 fiches...</span>
+            <span>Chargement des 1 069 mesures &amp; 111 fiches...</span>
           </div>
         </div>
       </div>
@@ -143,19 +221,28 @@ export default function App() {
             <IconSearch size={18} />
           </button>
 
-          {/* Alert Button */}
+          {/* Alerts Dedicated Button */}
           <button
-            onClick={() => setAlertSettingsOpen(true)}
+            onClick={() => setAlertsManagerOpen(true)}
             className="relative w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
-            title="Programmer des alertes"
+            title="Gestion des alertes"
           >
             <IconBell size={18} />
-            {alertConfig.enabled && (
+            {activeAlertsCount > 0 && (
               <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 ring-2 ring-[#0B0118]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-[#0B0118]" />
               </span>
             )}
+          </button>
+
+          {/* Settings Button */}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
+            title="Paramètres de l'application"
+          >
+            <IconSettings size={18} />
           </button>
         </div>
       </header>
@@ -243,7 +330,7 @@ export default function App() {
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                  Filtrer par centre d'intérêt & profil citoyen
+                  Filtrer par centre d'intérêt &amp; profil citoyen
                 </span>
                 <span className="text-[11px] font-semibold text-purple-400/80">
                   {filteredSections.length} fiche{filteredSections.length > 1 ? 's' : ''} affichée{filteredSections.length > 1 ? 's' : ''}
@@ -289,12 +376,12 @@ export default function App() {
           <BudgetView budget={data.budget} />
         )}
 
-        {/* TAB 3: LES 5 PLANS D'URGENCE */}
+        {/* TAB 3: 5 PLANS SECTORIELS */}
         {activeTab === 'plans' && (
           <PlansView plans={data.plans} />
         )}
 
-        {/* TAB 4: LECTEUR INTÉGRAL DU LIVRE */}
+        {/* TAB 4: LECTEUR CONTINU DU LIVRE */}
         {activeTab === 'lecteur' && (
           <ReaderView
             data={data}
@@ -310,11 +397,17 @@ export default function App() {
         onDismiss={() => setInAppToastSection(null)}
       />
 
-      {/* Modal Fiche Intégrale */}
+      {/* Modal Fiche Intégrale with clickable category tags */}
       <ModalFicheIntegrale
         section={selectedSectionForModal}
         profiles={data.profiles}
         onClose={() => setSelectedSectionForModal(null)}
+        onSelectCategory={profileId => {
+          setSelectedSectionForModal(null);
+          setActiveTab('fiches');
+          setSelectedProfile(profileId);
+          window.scrollTo({ top: 320, behavior: 'smooth' });
+        }}
         onSetAlertForFiche={s => {
           setInAppToastSection(s);
         }}
@@ -329,15 +422,38 @@ export default function App() {
         onSelectSection={s => setSelectedSectionForModal(s)}
       />
 
-      {/* Alert Settings Modal */}
-      <AlertSettingsModal
-        isOpen={alertSettingsOpen}
-        onClose={() => setAlertSettingsOpen(false)}
-        config={alertConfig}
-        onUpdateConfig={cfg => setAlertConfig(cfg)}
+      {/* Settings Modal (includes "By HO" signature & links to alerts/updates) */}
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        alertConfig={multiAlertConfig}
+        onOpenAlerts={() => {
+          setSettingsOpen(false);
+          setAlertsManagerOpen(true);
+        }}
+        onOpenUpdates={() => {
+          setSettingsOpen(false);
+          setUpdateModalOpen(true);
+        }}
+        currentVersion={APP_CURRENT_VERSION}
+      />
+
+      {/* Dedicated Alerts & Notifications Manager Modal */}
+      <AlertsManagerModal
+        isOpen={alertsManagerOpen}
+        onClose={() => setAlertsManagerOpen(false)}
+        config={multiAlertConfig}
+        onUpdateConfig={cfg => setMultiAlertConfig(cfg)}
         sections={data.sections}
         profiles={data.profiles}
         onTriggerInAppTest={s => setInAppToastSection(s)}
+      />
+
+      {/* Dedicated Updates Modal */}
+      <UpdateModal
+        isOpen={updateModalOpen}
+        onClose={() => setUpdateModalOpen(false)}
+        currentVersion={APP_CURRENT_VERSION}
       />
 
       {/* Bottom Frosted Stitch Navigation Bar */}

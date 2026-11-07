@@ -52,7 +52,7 @@ export const SearchModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md text-white">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md text-white">
       <div className="fixed inset-0" onClick={onClose} />
 
       <div className="relative w-full max-w-2xl bg-[#140626] border border-purple-500/40 rounded-b-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10">
@@ -79,9 +79,10 @@ export const SearchModal = ({
           )}
           <button
             onClick={onClose}
-            className="px-3 py-1.5 text-xs font-bold text-purple-300 hover:text-white bg-purple-900/50 hover:bg-purple-900 rounded-xl transition-colors border border-purple-700/40"
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white transition-colors flex-shrink-0"
+            title="Fermer la recherche"
           >
-            Fermer
+            <IconClose size={20} />
           </button>
         </div>
 
