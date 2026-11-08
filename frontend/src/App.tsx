@@ -20,6 +20,8 @@ import { SettingsModal } from './components/SettingsModal';
 import { UpdateModal } from './components/UpdateModal';
 import { ShareModal } from './components/ShareModal';
 import { SocialNetworksModal } from './components/SocialNetworksModal';
+import { IosInstallModal } from './components/IosInstallModal';
+import { IosInstallBanner } from './components/IosInstallBanner';
 import { InAppAlertToast } from './components/InAppAlertToast';
 import { ReaderView } from './components/ReaderView';
 import { BudgetView } from './components/BudgetView';
@@ -36,7 +38,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.18';
+const APP_CURRENT_VERSION = 'v1.0.19';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -50,6 +52,7 @@ export default function App() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [socialModalOpen, setSocialModalOpen] = useState(false);
+  const [iosInstallModalOpen, setIosInstallModalOpen] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
   const [multiAlertConfig, setMultiAlertConfig] = useState<MultiAlertConfig>(loadMultiAlertConfig());
   const dataRef = useRef<ProgrammeData | null>(null);
@@ -109,7 +112,7 @@ export default function App() {
     ensureNotificationChannel();
     requestNotificationPermission();
 
-    fetch('/data/programme.json')
+    fetch('./data/programme.json')
       .then(res => res.json())
       .then((progData: ProgrammeData) => {
         setData(progData);
@@ -194,7 +197,8 @@ export default function App() {
       settingsOpen ||
       updateModalOpen ||
       shareModalOpen ||
-      socialModalOpen
+      socialModalOpen ||
+      iosInstallModalOpen
     );
 
     if (isAnyModalOpen) {
@@ -204,6 +208,8 @@ export default function App() {
     const handlePopState = () => {
       if (selectedSectionForModal) {
         setSelectedSectionForModal(null);
+      } else if (iosInstallModalOpen) {
+        setIosInstallModalOpen(false);
       } else if (shareModalOpen) {
         setShareModalOpen(false);
       } else if (socialModalOpen) {
@@ -221,7 +227,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen]);
+  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen]);
 
   // Native Capacitor back button listener
   useEffect(() => {
@@ -233,6 +239,8 @@ export default function App() {
         const handle = await CapApp.addListener('backButton', ({ canGoBack }) => {
           if (selectedSectionForModal) {
             setSelectedSectionForModal(null);
+          } else if (iosInstallModalOpen) {
+            setIosInstallModalOpen(false);
           } else if (shareModalOpen) {
             setShareModalOpen(false);
           } else if (socialModalOpen) {
@@ -264,7 +272,7 @@ export default function App() {
     return () => {
       if (removeListener) removeListener();
     };
-  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, activeTab]);
+  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, activeTab]);
 
   // Filtered fiches for the main card list
   const filteredSections = useMemo(() => {
@@ -288,7 +296,7 @@ export default function App() {
           <div className="relative w-20 h-20 mb-6 flex items-center justify-center">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-500 blur-lg opacity-60 animate-pulse" />
             <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#240046] via-[#10002b] to-[#3c096c] border border-purple-400/40 flex items-center justify-center shadow-2xl p-3">
-              <img src="/logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
+              <img src="./logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
             </div>
           </div>
 
@@ -319,7 +327,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="relative group flex-shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2e0059] via-[#150033] to-[#4c0297] border border-purple-400/40 flex items-center justify-center shadow-md p-1.5">
-              <img src="/logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
+              <img src="./logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
             </div>
           </div>
           <div>
@@ -595,7 +603,22 @@ export default function App() {
           setSettingsOpen(false);
           setSocialModalOpen(true);
         }}
+        onOpenIosInstall={() => {
+          setSettingsOpen(false);
+          setIosInstallModalOpen(true);
+        }}
         currentVersion={APP_CURRENT_VERSION}
+      />
+
+      {/* Dedicated iOS & Web PWA Install Guide Modal */}
+      <IosInstallModal
+        isOpen={iosInstallModalOpen}
+        onClose={() => setIosInstallModalOpen(false)}
+      />
+
+      {/* Floating iOS Install Banner (only shown on iOS Safari in browser mode) */}
+      <IosInstallBanner
+        onOpenGuide={() => setIosInstallModalOpen(true)}
       />
 
       {/* Dedicated Share & QR Code Modal */}

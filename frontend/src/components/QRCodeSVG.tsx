@@ -72,7 +72,7 @@ export const QRCodeSVG = ({ text, size = 220, className = '' }: QRCodeSVGProps) 
       />
       {/* Central Phi badge */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-[#0c0017] border-2 border-purple-500 shadow-md flex items-center justify-center p-1.5 pointer-events-none">
-        <img src="/logo-fi.png" alt="Phi" className="w-full h-full object-contain" />
+        <img src="./logo-fi.png" alt="Phi" className="w-full h-full object-contain" />
       </div>
     </div>
   );

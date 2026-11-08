@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { ProgrammeData, Section } from '../types/programme';
 import { IconChevronRight, IconClose, IconStar } from './Icons';
 
@@ -107,7 +107,7 @@ export const ReaderView = ({ data, onOpenSectionModal }: ReaderViewProps) => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <img
-            src="/cover.jpg"
+            src="./cover.jpg"
             alt="Couverture L'Avenir en commun"
             className="w-48 sm:w-56 mx-auto rounded-2xl shadow-2xl mb-6 border-2 border-purple-500/40"
           />

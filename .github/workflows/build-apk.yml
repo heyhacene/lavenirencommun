@@ -1,4 +1,4 @@
-﻿name: Build Android APK (Capacitor)
+name: Build Android APK (Capacitor)
 
 on:
   push:
@@ -109,6 +109,7 @@ jobs:
             - **Option C d'alertes** : notifications natives Android programmables + popups in-app
             - **Chiffrage budgétaire 2027** (+106,4 Md€ / +81,7 Md€ / 100 Md€) & 5 Plans sectoriels
             - **Lecteur continu** du livre avec sommaire interactif
+            - **Version Web & iOS (PWA)** : installation plein écran hors-ligne sur iPhone, iPad et PC
 
             APK signé et aligné, prêt à être installé directement sur votre smartphone ou tablette Android.
           files: |
@@ -116,3 +117,10 @@ jobs:
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy PWA to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
