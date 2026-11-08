@@ -6,7 +6,8 @@ import {
   IconChevronRight,
   IconRefresh,
   IconBookOpen,
-  IconStar
+  IconShare,
+  IconMegaphone
 } from './Icons';
 
 interface SettingsModalProps {
@@ -15,6 +16,8 @@ interface SettingsModalProps {
   alertConfig: MultiAlertConfig;
   onOpenAlerts: () => void;
   onOpenUpdates: () => void;
+  onOpenShare: () => void;
+  onOpenSocial: () => void;
   currentVersion?: string;
 }
 
@@ -24,7 +27,9 @@ export const SettingsModal = ({
   alertConfig,
   onOpenAlerts,
   onOpenUpdates,
-  currentVersion = 'v1.0.11'
+  onOpenShare,
+  onOpenSocial,
+  currentVersion = 'v1.0.17'
 }: SettingsModalProps) => {
   if (!isOpen) return null;
 
@@ -104,7 +109,65 @@ export const SettingsModal = ({
             </div>
           </div>
 
-          {/* Card 2: Mises à jour */}
+          {/* Card 2: Partager l'application & QR Code (User Requirement) */}
+          <div
+            onClick={onOpenShare}
+            className="p-4 rounded-2xl bg-[#1b0833] border border-purple-500/30 hover:border-amber-400/60 transition-all cursor-pointer group shadow-lg active:scale-[0.99]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-tr from-amber-500 to-rose-600 rounded-xl text-white shadow-md">
+                  <IconShare size={20} />
+                </div>
+                <div>
+                  <div className="font-extrabold text-sm text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
+                    <span>Partager l'application &amp; QR Code</span>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                      Nouveau
+                    </span>
+                  </div>
+                  <div className="text-xs text-purple-300/80 mt-0.5">
+                    Lien de téléchargement &amp; flash code pour militants et proches
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-purple-400 group-hover:text-amber-300 transition-colors">
+                <IconChevronRight size={18} />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Réseaux Sociaux LFI & Action Populaire (User Requirement) */}
+          <div
+            onClick={onOpenSocial}
+            className="p-4 rounded-2xl bg-[#1b0833] border border-purple-500/30 hover:border-indigo-400/60 transition-all cursor-pointer group shadow-lg active:scale-[0.99]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-xl text-white shadow-md">
+                  <IconMegaphone size={20} />
+                </div>
+                <div>
+                  <div className="font-extrabold text-sm text-white group-hover:text-purple-200 transition-colors flex items-center gap-2">
+                    <span>Réseaux officiels &amp; Action Populaire</span>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30">
+                      LFI
+                    </span>
+                  </div>
+                  <div className="text-xs text-purple-300/80 mt-0.5">
+                    YouTube, TikTok, Telegram, Discord et l'application Action Populaire
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-purple-400 group-hover:text-amber-300 transition-colors">
+                <IconChevronRight size={18} />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Mises à jour */}
           <div
             onClick={onOpenUpdates}
             className="p-4 rounded-2xl bg-[#1b0833] border border-purple-500/30 hover:border-purple-400/60 transition-all cursor-pointer group shadow-lg active:scale-[0.99]"
@@ -133,7 +196,7 @@ export const SettingsModal = ({
             </div>
           </div>
 
-          {/* Card 3: À propos & Présentation du Programme */}
+          {/* Card 5: À propos & Présentation du Programme */}
           <div className="p-4 rounded-2xl bg-purple-950/30 border border-purple-800/40 space-y-3">
             <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-wider text-purple-300">
               <IconBookOpen size={16} className="text-purple-400" />

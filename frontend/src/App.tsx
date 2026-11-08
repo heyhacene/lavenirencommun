@@ -18,6 +18,8 @@ import { SearchModal } from './components/SearchModal';
 import { AlertsManagerModal } from './components/AlertsManagerModal';
 import { SettingsModal } from './components/SettingsModal';
 import { UpdateModal } from './components/UpdateModal';
+import { ShareModal } from './components/ShareModal';
+import { SocialNetworksModal } from './components/SocialNetworksModal';
 import { InAppAlertToast } from './components/InAppAlertToast';
 import { ReaderView } from './components/ReaderView';
 import { BudgetView } from './components/BudgetView';
@@ -34,7 +36,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.16';
+const APP_CURRENT_VERSION = 'v1.0.17';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -46,6 +48,8 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [alertsManagerOpen, setAlertsManagerOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [socialModalOpen, setSocialModalOpen] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
   const [multiAlertConfig, setMultiAlertConfig] = useState<MultiAlertConfig>(loadMultiAlertConfig());
   const dataRef = useRef<ProgrammeData | null>(null);
@@ -80,6 +84,8 @@ export default function App() {
       setSettingsOpen(false);
       setAlertsManagerOpen(false);
       setUpdateModalOpen(false);
+      setShareModalOpen(false);
+      setSocialModalOpen(false);
       setSearchModalOpen(false);
       setActiveTab('fiches');
       setSelectedSectionForModal(found);
@@ -186,7 +192,9 @@ export default function App() {
       searchModalOpen ||
       alertsManagerOpen ||
       settingsOpen ||
-      updateModalOpen
+      updateModalOpen ||
+      shareModalOpen ||
+      socialModalOpen
     );
 
     if (isAnyModalOpen) {
@@ -196,6 +204,10 @@ export default function App() {
     const handlePopState = () => {
       if (selectedSectionForModal) {
         setSelectedSectionForModal(null);
+      } else if (shareModalOpen) {
+        setShareModalOpen(false);
+      } else if (socialModalOpen) {
+        setSocialModalOpen(false);
       } else if (alertsManagerOpen) {
         setAlertsManagerOpen(false);
       } else if (updateModalOpen) {
@@ -209,7 +221,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen]);
+  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen]);
 
   // Native Capacitor back button listener
   useEffect(() => {
@@ -221,6 +233,10 @@ export default function App() {
         const handle = await CapApp.addListener('backButton', ({ canGoBack }) => {
           if (selectedSectionForModal) {
             setSelectedSectionForModal(null);
+          } else if (shareModalOpen) {
+            setShareModalOpen(false);
+          } else if (socialModalOpen) {
+            setSocialModalOpen(false);
           } else if (alertsManagerOpen) {
             setAlertsManagerOpen(false);
           } else if (updateModalOpen) {
@@ -248,7 +264,7 @@ export default function App() {
     return () => {
       if (removeListener) removeListener();
     };
-  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, activeTab]);
+  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, activeTab]);
 
   // Filtered fiches for the main card list
   const filteredSections = useMemo(() => {
@@ -558,7 +574,7 @@ export default function App() {
         onSelectSection={s => setSelectedSectionForModal(s)}
       />
 
-      {/* Settings Modal (includes "By HO" signature & links to alerts/updates) */}
+      {/* Settings Modal (includes "By HO" signature, Alerts, Share & QR, Social, and Updates) */}
       <SettingsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -571,7 +587,27 @@ export default function App() {
           setSettingsOpen(false);
           setUpdateModalOpen(true);
         }}
+        onOpenShare={() => {
+          setSettingsOpen(false);
+          setShareModalOpen(true);
+        }}
+        onOpenSocial={() => {
+          setSettingsOpen(false);
+          setSocialModalOpen(true);
+        }}
         currentVersion={APP_CURRENT_VERSION}
+      />
+
+      {/* Dedicated Share & QR Code Modal */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+      />
+
+      {/* Dedicated Social Networks & Action Populaire Modal */}
+      <SocialNetworksModal
+        isOpen={socialModalOpen}
+        onClose={() => setSocialModalOpen(false)}
       />
 
       {/* Dedicated Alerts & Notifications Manager Modal */}
