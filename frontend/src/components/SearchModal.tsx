@@ -88,6 +88,22 @@ export const SearchModal = ({
 
         {/* Quick filters */}
         <div className="px-4 py-3 bg-[#100322] border-b border-purple-500/15 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+          <button
+            onClick={() => {
+              if (sections.length > 0) {
+                const rand = sections[Math.floor(Math.random() * sections.length)];
+                if (rand) {
+                  onSelectSection(rand);
+                  onClose();
+                }
+              }
+            }}
+            className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-600/30 border border-amber-400/50 text-amber-300 hover:text-white font-bold hover:bg-amber-500/30 active:scale-95 transition-all flex items-center gap-1.5"
+            title="Ouvrir une proposition au hasard"
+          >
+            <span>🎲</span>
+            <span>Au hasard</span>
+          </button>
           {profiles.map(p => {
             const active = selectedProfile === p.id;
             const colors = getProfileColor(p.id);

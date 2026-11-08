@@ -34,7 +34,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.15';
+const APP_CURRENT_VERSION = 'v1.0.16';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -83,6 +83,18 @@ export default function App() {
       setSearchModalOpen(false);
       setActiveTab('fiches');
       setSelectedSectionForModal(found);
+    }
+  };
+
+  // Open a proposal completely at random
+  const handleOpenRandomFiche = () => {
+    if (!dataRef.current || !dataRef.current.sections || dataRef.current.sections.length === 0) return;
+    const sections = dataRef.current.sections;
+    const rand = sections[Math.floor(Math.random() * sections.length)];
+    if (rand) {
+      setInAppToastSection(null);
+      setActiveTab('fiches');
+      setSelectedSectionForModal(rand);
     }
   };
 
@@ -310,6 +322,15 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Proposition au hasard header button */}
+          <button
+            onClick={handleOpenRandomFiche}
+            className="w-10 h-10 rounded-xl bg-purple-950/60 border border-amber-500/40 text-amber-300 hover:text-white hover:bg-amber-600/30 transition-all flex items-center justify-center active:scale-95 text-base"
+            title="Une proposition au hasard"
+          >
+            🎲
+          </button>
+
           {/* Search Button */}
           <button
             onClick={() => setSearchModalOpen(true)}
@@ -407,18 +428,30 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Interactive Stitch Search Bar Pill */}
-                <div
-                  onClick={() => setSearchModalOpen(true)}
-                  className="stitch-search-pill mt-3 group"
-                >
-                  <IconSearch className="text-purple-300 group-hover:text-white transition-colors" size={18} />
-                  <span className="text-xs sm:text-sm text-purple-300/90 group-hover:text-purple-100 transition-colors font-medium">
-                    Rechercher une mesure (ex: <em className="not-italic text-amber-300 font-semibold">SMIC</em>, <em className="not-italic text-emerald-300 font-semibold">Retraite à 60 ans</em>, <em className="not-italic text-cyan-300 font-semibold">RIC</em>)...
-                  </span>
-                  <div className="ml-auto hidden sm:flex items-center gap-1 text-[10px] font-bold bg-purple-900/80 px-2.5 py-1 rounded-lg text-purple-200 border border-purple-400/20">
-                    Rechercher
+                {/* Search Bar & Random Proposal Action Row */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 mt-3">
+                  <div
+                    onClick={() => setSearchModalOpen(true)}
+                    className="stitch-search-pill flex-1 group"
+                  >
+                    <IconSearch className="text-purple-300 group-hover:text-white transition-colors" size={18} />
+                    <span className="text-xs sm:text-sm text-purple-300/90 group-hover:text-purple-100 transition-colors font-medium truncate">
+                      Rechercher une mesure (ex: <em className="not-italic text-amber-300 font-semibold">SMIC</em>, <em className="not-italic text-emerald-300 font-semibold">Retraite à 60 ans</em>)...
+                    </span>
+                    <div className="ml-auto hidden sm:flex items-center gap-1 text-[10px] font-bold bg-purple-900/80 px-2.5 py-1 rounded-lg text-purple-200 border border-purple-400/20">
+                      Rechercher
+                    </div>
                   </div>
+
+                  {/* Bouton "Une proposition au hasard" */}
+                  <button
+                    onClick={handleOpenRandomFiche}
+                    className="py-3 px-4.5 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-slate-950 hover:text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 border border-amber-300/40 select-none cursor-pointer flex-shrink-0"
+                    title="Découvrir une proposition au hasard"
+                  >
+                    <span className="text-base">🎲</span>
+                    <span className="tracking-wide uppercase font-black text-[12px]">Une proposition au hasard</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -499,11 +532,12 @@ export default function App() {
         onDismiss={() => setInAppToastSection(null)}
       />
 
-      {/* Modal Fiche Intégrale with clickable category tags */}
+      {/* Modal Fiche Intégrale with clickable category tags & random proposal cycling */}
       <ModalFicheIntegrale
         section={selectedSectionForModal}
         profiles={data.profiles}
         onClose={() => setSelectedSectionForModal(null)}
+        onRandomFiche={handleOpenRandomFiche}
         onSelectCategory={profileId => {
           setSelectedSectionForModal(null);
           setActiveTab('fiches');

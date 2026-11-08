@@ -17,6 +17,7 @@ interface ModalFicheIntegraleProps {
   onClose: () => void;
   onSelectCategory?: (profileId: string) => void;
   onSetAlertForFiche?: (section: Section) => void;
+  onRandomFiche?: () => void;
 }
 
 export const ModalFicheIntegrale = ({
@@ -24,7 +25,8 @@ export const ModalFicheIntegrale = ({
   profiles,
   onClose,
   onSelectCategory,
-  onSetAlertForFiche
+  onSetAlertForFiche,
+  onRandomFiche
 }: ModalFicheIntegraleProps) => {
   const [copied, setCopied] = useState(false);
 
@@ -205,14 +207,25 @@ export const ModalFicheIntegrale = ({
           </div>
         </div>
 
-        {/* Footer sticky bar with prominent, functioning button */}
-        <div className="sticky bottom-0 bg-[#16062b] border-t border-purple-500/20 px-6 py-4 flex items-center justify-between pb-[max(1rem,env(safe-area-inset-bottom,16px))]">
-          <span className="text-xs text-purple-300/80 font-medium">
-            L'Avenir en commun • 2027
-          </span>
+        {/* Footer sticky bar with prominent buttons */}
+        <div className="sticky bottom-0 bg-[#16062b] border-t border-purple-500/20 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2 pb-[max(1rem,env(safe-area-inset-bottom,16px))]">
+          {onRandomFiche ? (
+            <button
+              onClick={onRandomFiche}
+              className="px-4 py-2.5 bg-gradient-to-r from-purple-900/90 to-amber-950/80 hover:from-purple-800 hover:to-amber-900 text-amber-300 hover:text-white border border-amber-500/40 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+              title="Passer à une autre proposition au hasard"
+            >
+              <span className="text-sm">🎲</span>
+              <span>Autre proposition</span>
+            </button>
+          ) : (
+            <span className="text-xs text-purple-300/80 font-medium">
+              L'Avenir en commun • 2027
+            </span>
+          )}
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-95"
+            className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-95"
           >
             Fermer la fiche
           </button>
