@@ -1,9 +1,26 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { registerPlugin } from '@capacitor/core';
 import type { MultiAlertConfig, AlertSchedule, Section } from '../types/programme';
 
 const STORAGE_KEY_MULTI_ALERT = 'aec_multi_alerts_v2';
 const STORAGE_KEY_LEGACY = 'aec_alert_config_v1';
-export const NOTIFICATION_CHANNEL_ID = 'aec_programme_alerts';
+
+// v3 channel ID to force fresh creation on devices where legacy channel was stuck or corrupted
+export const NOTIFICATION_CHANNEL_ID = 'aec_programme_alerts_v3';
+
+// Native plugin bridge to open Android system notification settings directly
+interface NativeSettingsPluginType {
+  openNotificationSettings(): Promise<void>;
+}
+const NativeSettings = registerPlugin<NativeSettingsPluginType>('NativeSettings');
+
+export async function openNativeNotificationSettings(): Promise<void> {
+  try {
+    await NativeSettings.openNotificationSettings();
+  } catch (e) {
+    console.warn('[AEC] Could not open native notification settings:', e);
+  }
+}
 
 export const defaultSchedules: AlertSchedule[] = [
   {
@@ -38,6 +55,11 @@ export interface NotificationPayloadTarget {
   sectionId?: string;
   globalIndex?: number;
   title?: string;
+}
+
+export interface PermissionResult {
+  granted: boolean;
+  display: 'granted' | 'denied' | 'prompt' | 'prompt-with-rationale' | 'unknown';
 }
 
 let pendingNotificationTarget: NotificationPayloadTarget | null = null;
@@ -176,30 +198,56 @@ export function saveMultiAlertConfig(config: MultiAlertConfig): void {
 
 export async function ensureNotificationChannel(): Promise<void> {
   try {
+    // Delete previous channel versions to avoid corrupted or blocked system states
+    try {
+      await LocalNotifications.deleteChannel({ id: 'aec_programme_alerts' });
+      await LocalNotifications.deleteChannel({ id: 'aec_programme_alerts_v2' });
+    } catch {
+      // Ignored
+    }
+
     await LocalNotifications.createChannel({
       id: NOTIFICATION_CHANNEL_ID,
       name: "Alertes L'Avenir en commun",
       description: "Rappels et notifications des mesures officielles du programme 2027",
-      importance: 5, // High importance (banner, vibration, heads-up)
+      importance: 5, // High importance (heads-up banner, sound, vibration)
       visibility: 1, // Public on lockscreen
-      vibration: true
+      vibration: true,
+      lights: true,
+      lightColor: '#9333EA'
     });
+    console.log('[AEC] Notification channel ensured:', NOTIFICATION_CHANNEL_ID);
   } catch (e) {
     console.warn('[AEC] Could not create notification channel:', e);
   }
 }
 
-export async function requestNotificationPermission(): Promise<boolean> {
+export async function checkNotificationPermission(): Promise<PermissionResult> {
+  try {
+    const status = await LocalNotifications.checkPermissions();
+    return {
+      granted: status.display === 'granted',
+      display: (status.display || 'unknown') as any
+    };
+  } catch (e) {
+    return { granted: false, display: 'unknown' };
+  }
+}
+
+export async function requestNotificationPermission(): Promise<PermissionResult> {
   try {
     const status = await LocalNotifications.checkPermissions();
     if (status.display === 'granted') {
-      return true;
+      return { granted: true, display: 'granted' };
     }
     const res = await LocalNotifications.requestPermissions();
-    return res.display === 'granted';
+    return {
+      granted: res.display === 'granted',
+      display: (res.display || 'unknown') as any
+    };
   } catch (e) {
     console.warn('Native notifications check failed / web fallback:', e);
-    return false;
+    return { granted: false, display: 'unknown' };
   }
 }
 
@@ -208,6 +256,12 @@ export async function scheduleAllAlerts(
   sections: Section[]
 ): Promise<boolean> {
   saveMultiAlertConfig(config);
+
+  const perm = await requestNotificationPermission();
+  if (!perm.granted) {
+    console.warn('[AEC] Cannot schedule alerts: notification permission not granted (status:', perm.display, ')');
+    return false;
+  }
 
   await ensureNotificationChannel();
 
@@ -282,19 +336,48 @@ export async function scheduleAllAlerts(
     console.log(`[AEC] Scheduled ${notifsToSchedule.length} notifications successfully.`);
     return true;
   } catch (e) {
-    console.warn('[AEC] Could not schedule native notifications:', e);
-    return false;
+    console.warn('[AEC] Could not schedule with allowWhileIdle, trying fallback without allowWhileIdle:', e);
+    try {
+      const fallbackNotifs = notifsToSchedule.map(n => ({
+        ...n,
+        schedule: {
+          at: n.schedule.at,
+          allowWhileIdle: false,
+          repeats: true,
+          every: 'day'
+        }
+      }));
+      await LocalNotifications.schedule({ notifications: fallbackNotifs });
+      console.log(`[AEC] Scheduled ${fallbackNotifs.length} notifications with fallback.`);
+      return true;
+    } catch (e2) {
+      console.error('[AEC] Failed fallback schedule:', e2);
+      return false;
+    }
   }
 }
 
-export async function triggerTestNotification(section: Section): Promise<boolean> {
-  await requestNotificationPermission();
+export async function triggerTestNotification(section: Section): Promise<{
+  success: boolean;
+  error?: string;
+  display?: string;
+}> {
+  const perm = await requestNotificationPermission();
+  if (!perm.granted) {
+    return {
+      success: false,
+      error: 'permission_denied',
+      display: perm.display
+    };
+  }
+
   await ensureNotificationChannel();
 
   try {
-    const testId = 999999;
+    const testId = Math.floor(Math.random() * 800000) + 100000;
 
-    // Post immediately so Android displays it right away in notification center
+    // IMMEDIATE DELIVERY: Omit schedule so Android NotificationManagerCompat.notify() is called directly
+    // This bypasses AlarmManager and posts the notification to Android's status bar instantly!
     await LocalNotifications.schedule({
       notifications: [
         {
@@ -304,10 +387,6 @@ export async function triggerTestNotification(section: Section): Promise<boolean
           channelId: NOTIFICATION_CHANNEL_ID,
           smallIcon: 'ic_stat_aec',
           iconColor: '#9333EA',
-          schedule: {
-            at: new Date(Date.now() + 250),
-            allowWhileIdle: true
-          },
           extra: {
             sectionId: section.id,
             globalIndex: section.globalIndex,
@@ -316,10 +395,14 @@ export async function triggerTestNotification(section: Section): Promise<boolean
         }
       ]
     });
-    console.log('[AEC] Test notification triggered immediately for:', section.title);
-    return true;
-  } catch (e) {
+    console.log('[AEC] Test notification posted immediately via NotificationManager');
+    return { success: true, display: perm.display };
+  } catch (e: any) {
     console.error('[AEC] Failed to trigger test notification:', e);
-    return false;
+    return {
+      success: false,
+      error: e?.message || String(e),
+      display: perm.display
+    };
   }
 }

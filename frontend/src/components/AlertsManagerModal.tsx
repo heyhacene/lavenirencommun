@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Section, Profile, MultiAlertConfig, AlertSchedule } from '../types/programme';
 import {
   scheduleAllAlerts,
   triggerTestNotification,
-  requestNotificationPermission
+  requestNotificationPermission,
+  checkNotificationPermission,
+  openNativeNotificationSettings
 } from '../services/notifications';
 import {
   IconBell,
@@ -45,8 +47,18 @@ export const AlertsManagerModal = ({
           { id: 'soir_1930', enabled: true, time: '19:30', label: 'Fiche du Soir', profile: 'tous' }
         ]
   );
+  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [testSuccess, setTestSuccess] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
+
+  // Check Android permission whenever modal opens
+  useEffect(() => {
+    if (isOpen) {
+      checkNotificationPermission().then(p => {
+        setPermissionStatus(p.display as any);
+      });
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -54,7 +66,8 @@ export const AlertsManagerModal = ({
     const next = !globalEnabled;
     setGlobalEnabled(next);
     if (next) {
-      await requestNotificationPermission();
+      const p = await requestNotificationPermission();
+      setPermissionStatus(p.display as any);
     }
   };
 
@@ -94,7 +107,8 @@ export const AlertsManagerModal = ({
 
   const handleSave = async () => {
     if (globalEnabled) {
-      await requestNotificationPermission();
+      const p = await requestNotificationPermission();
+      setPermissionStatus(p.display as any);
     }
     const newConfig: MultiAlertConfig = {
       globalEnabled,
@@ -109,18 +123,44 @@ export const AlertsManagerModal = ({
     }, 1100);
   };
 
+  const handleRequestPermission = async () => {
+    const p = await requestNotificationPermission();
+    setPermissionStatus(p.display as any);
+    if (p.display === 'denied') {
+      await openNativeNotificationSettings();
+    }
+  };
+
   const handleTestNow = async (profileId: string = 'tous') => {
     const pool = profileId === 'tous'
       ? sections
       : sections.filter(s => s.profiles && s.profiles.includes(profileId));
     const randomSection = pool[Math.floor(Math.random() * pool.length)] || sections[0];
 
-    if (randomSection) {
-      onTriggerInAppTest(randomSection);
-      await triggerTestNotification(randomSection);
-      setTestSuccess(true);
-      setTimeout(() => setTestSuccess(false), 3000);
+    if (!randomSection) return;
+
+    setTestResult(null);
+    const res = await triggerTestNotification(randomSection);
+    setPermissionStatus((res.display || 'unknown') as any);
+
+    if (res.success) {
+      setTestResult({
+        success: true,
+        msg: 'Notification envoyée ! Regardez dans votre barre d’état Android (en haut).'
+      });
+    } else if (res.error === 'permission_denied') {
+      setTestResult({
+        success: false,
+        msg: 'Bloqué par Android : les notifications sont désactivées. Cliquez sur "Ouvrir Paramètres Android" ci-dessus.'
+      });
+    } else {
+      setTestResult({
+        success: false,
+        msg: `Erreur : ${res.error || 'Impossible d’émettre la notification'}`
+      });
     }
+
+    setTimeout(() => setTestResult(null), 7000);
   };
 
   return (
@@ -164,8 +204,67 @@ export const AlertsManagerModal = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto px-5 py-5 space-y-5 flex-1">
-          {/* Master Global Switch with unmistakable visual state */}
+        <div className="overflow-y-auto px-5 py-5 space-y-4 flex-1">
+          {/* Android System Permission Banner */}
+          {permissionStatus === 'denied' && (
+            <div className="bg-gradient-to-br from-rose-950/80 to-purple-950/80 border-2 border-rose-500/60 p-4 rounded-2xl shadow-xl space-y-2.5 animate-pulse">
+              <div className="flex items-center gap-2 text-rose-300 font-black text-xs uppercase tracking-wider">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
+                ⚠️ Notifications bloquées par Android
+              </div>
+              <p className="text-xs text-rose-100 font-medium leading-relaxed">
+                Le système Android bloque les notifications pour cette application. Vous devez les autoriser dans les paramètres de votre téléphone pour recevoir les alertes.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  onClick={openNativeNotificationSettings}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-black text-xs shadow-lg active:scale-95 flex items-center gap-1.5"
+                >
+                  <span>⚙️ Ouvrir les Paramètres Android</span>
+                </button>
+                <button
+                  onClick={async () => {
+                    const p = await checkNotificationPermission();
+                    setPermissionStatus(p.display as any);
+                  }}
+                  className="px-3 py-2 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 text-xs font-bold"
+                >
+                  🔄 Re-vérifier
+                </button>
+              </div>
+            </div>
+          )}
+
+          {permissionStatus === 'granted' && (
+            <div className="bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2 text-emerald-300 font-bold">
+                <IconCheck size={16} className="text-emerald-400" />
+                Notifications système autorisées par Android
+              </span>
+              <button
+                onClick={openNativeNotificationSettings}
+                className="text-[11px] text-purple-300 hover:text-white underline font-semibold"
+              >
+                Gérer ⚙️
+              </button>
+            </div>
+          )}
+
+          {permissionStatus === 'prompt' && (
+            <div className="bg-amber-950/40 border border-amber-500/40 p-3 rounded-xl flex items-center justify-between text-xs">
+              <span className="text-amber-200 font-bold">
+                🔔 Autorisation Android requise
+              </span>
+              <button
+                onClick={handleRequestPermission}
+                className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs active:scale-95"
+              >
+                Autoriser
+              </button>
+            </div>
+          )}
+
+          {/* Master Global Switch */}
           <div
             onClick={handleGlobalToggle}
             className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between shadow-lg select-none ${
@@ -201,40 +300,30 @@ export const AlertsManagerModal = ({
               </div>
             </div>
 
-            {/* Custom High-Contrast Toggle Switch */}
+            {/* iOS/Material Style Switch Track */}
             <div
-              className={`relative w-14 h-8 rounded-full transition-colors duration-200 ease-in-out p-1 flex-shrink-0 ${
-                globalEnabled ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]' : 'bg-slate-700'
+              className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 ease-in-out flex items-center ${
+                globalEnabled ? 'bg-emerald-500 justify-end' : 'bg-slate-700 justify-start'
               }`}
             >
-              <div
-                className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
-                  globalEnabled ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              >
-                {globalEnabled ? (
-                  <IconCheck size={14} className="text-emerald-600 font-black" />
-                ) : (
-                  <span className="w-2 h-0.5 bg-slate-400 rounded-full" />
-                )}
-              </div>
+              <div className="w-6 h-6 rounded-full bg-white shadow-md transform transition-transform" />
             </div>
           </div>
 
           {globalEnabled && (
             <>
-              {/* Schedules Section Header */}
+              {/* Header section for schedules list */}
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs font-black uppercase tracking-wider text-purple-300 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                  Vos heures de rappel ({schedules.length})
+                  Horaires programmés ({schedules.filter(s => s.enabled).length}/{schedules.length} actifs)
                 </span>
                 <button
                   onClick={handleAddSchedule}
-                  className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95"
+                  className="px-2.5 py-1 rounded-xl bg-purple-600/40 hover:bg-purple-600 border border-purple-400/40 text-white text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
                 >
-                  <IconPlus size={15} />
-                  <span>Ajouter une alerte</span>
+                  <IconPlus size={14} />
+                  <span>Ajouter une heure</span>
                 </button>
               </div>
 
@@ -243,45 +332,50 @@ export const AlertsManagerModal = ({
                 {schedules.map((schedule, idx) => (
                   <div
                     key={schedule.id}
-                    className={`p-4 rounded-2xl border transition-all ${
+                    className={`p-3.5 rounded-2xl border transition-all ${
                       schedule.enabled
-                        ? 'bg-[#1b0833] border-purple-500/40 shadow-md'
-                        : 'bg-[#100320]/60 border-purple-900/30 opacity-70'
+                        ? 'bg-[#1e073a] border-purple-500/40 shadow-md'
+                        : 'bg-[#110424]/60 border-purple-900/30 opacity-60'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      {/* Left: Checkbox / Toggle */}
-                      <div className="flex items-center gap-3">
+                      {/* Left: Checkbox switch & Label */}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button
                           onClick={() => handleToggleSchedule(schedule.id)}
-                          className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
+                          className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
                             schedule.enabled
-                              ? 'bg-purple-600 border-purple-400 text-white shadow-sm'
-                              : 'bg-purple-950/40 border-purple-800/60 text-transparent'
+                              ? 'bg-purple-600 text-white shadow-sm'
+                              : 'bg-purple-950/80 border border-purple-700/50 text-transparent'
                           }`}
                         >
                           <IconCheck size={14} />
                         </button>
 
-                        <div>
-                          <span className="text-xs font-black text-purple-200">
-                            Alerte #{idx + 1}
-                          </span>
-                          <span className="text-[11px] text-purple-400/80 ml-2">
-                            {schedule.enabled ? 'Active' : 'Désactivée'}
-                          </span>
+                        <div className="min-w-0 flex-1">
+                          <input
+                            type="text"
+                            value={schedule.label}
+                            onChange={e => {
+                              const val = e.target.value;
+                              setSchedules(prev =>
+                                prev.map(s => (s.id === schedule.id ? { ...s, label: val } : s))
+                              );
+                            }}
+                            className="bg-transparent border-b border-transparent focus:border-purple-400 text-white font-bold text-sm outline-none w-full truncate py-0.5"
+                            placeholder="Nom du rappel..."
+                          />
                         </div>
                       </div>
 
-                      {/* Right: Native Time Input + Delete */}
+                      {/* Right: Native Time Input Clock */}
                       <div className="flex items-center gap-2">
-                        {/* Native HTML5 time input: opens Android system clock picker cleanly */}
-                        <div className="relative">
+                        <div className="flex items-center bg-[#2b0852] border border-purple-400/50 rounded-xl px-2.5 py-1.5 shadow-inner">
                           <input
                             type="time"
                             value={schedule.time}
                             onChange={e => handleTimeChange(schedule.id, e.target.value)}
-                            className="bg-[#2a084f] border border-purple-400/60 hover:border-purple-300 text-white font-black text-base px-3 py-1.5 rounded-xl outline-none shadow-sm cursor-pointer"
+                            className="bg-transparent text-white font-black text-sm outline-none cursor-pointer"
                           />
                         </div>
 
@@ -351,13 +445,26 @@ export const AlertsManagerModal = ({
                 </div>
               </div>
 
+              {/* Test Result Message */}
+              {testResult && (
+                <div
+                  className={`p-3 rounded-xl border text-xs font-bold leading-relaxed ${
+                    testResult.success
+                      ? 'bg-emerald-950/80 border-emerald-500/60 text-emerald-200'
+                      : 'bg-rose-950/80 border-rose-500/60 text-rose-200'
+                  }`}
+                >
+                  {testResult.msg}
+                </div>
+              )}
+
               {/* Test Now Button */}
               <button
                 onClick={() => handleTestNow('tous')}
-                className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-98"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl active:scale-98"
               >
-                <IconBell size={16} className="text-slate-950" />
-                {testSuccess ? 'Notification déclenchée !' : "Tester une alerte maintenant (popup 3s)"}
+                <IconBell size={18} className="text-white" />
+                <span>Tester une alerte Android maintenant (instantané)</span>
               </button>
             </>
           )}
