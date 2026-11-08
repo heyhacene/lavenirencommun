@@ -8,6 +8,7 @@ interface SearchModalProps {
   sections: Section[];
   profiles: Profile[];
   onSelectSection: (section: Section) => void;
+  onOpenSimulator?: () => void;
 }
 
 export const SearchModal = ({
@@ -15,7 +16,8 @@ export const SearchModal = ({
   onClose,
   sections,
   profiles,
-  onSelectSection
+  onSelectSection,
+  onOpenSimulator
 }: SearchModalProps) => {
   const [query, setQuery] = useState('');
   const [selectedProfile, setSelectedProfile] = useState<string>('tous');
@@ -104,6 +106,19 @@ export const SearchModal = ({
             <span>🎲</span>
             <span>Au hasard</span>
           </button>
+          {onOpenSimulator && (
+            <button
+              onClick={() => {
+                onClose();
+                onOpenSimulator();
+              }}
+              className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-600/30 border border-emerald-400/50 text-emerald-300 hover:text-white font-bold hover:bg-emerald-500/30 active:scale-95 transition-all flex items-center gap-1.5"
+              title="Simulateur d'impôts et succession LFI"
+            >
+              <span>💼</span>
+              <span>Simulateur d'impôts</span>
+            </button>
+          )}
           {profiles.map(p => {
             const active = selectedProfile === p.id;
             const colors = getProfileColor(p.id);
@@ -135,6 +150,29 @@ export const SearchModal = ({
 
         {/* Results List */}
         <div className="overflow-y-auto divide-y divide-purple-900/30 p-2 space-y-1">
+          {onOpenSimulator && query && /imp[oô]t|csg|fisc|simulat|tranche|succession|h[eé]rit/i.test(query) && (
+            <div
+              onClick={() => {
+                onClose();
+                onOpenSimulator();
+              }}
+              className="p-3.5 m-1 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-purple-950/80 to-indigo-950/80 border border-emerald-500/50 cursor-pointer hover:border-emerald-400 transition-all flex items-center justify-between shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-xl flex-shrink-0">
+                  💼
+                </div>
+                <div>
+                  <div className="text-[11px] font-black text-emerald-300 uppercase tracking-wider">Outil officiel LFI • 14 tranches</div>
+                  <div className="text-sm font-bold text-white">Simulateur d'impôt sur le revenu &amp; succession</div>
+                  <div className="text-xs text-purple-200/80">Estimez vos impôts et votre gain de pouvoir d'achat</div>
+                </div>
+              </div>
+              <span className="text-emerald-400 font-bold text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex-shrink-0">
+                Ouvrir ➜
+              </span>
+            </div>
+          )}
           {filteredSections.length === 0 ? (
             <div className="py-14 text-center text-slate-400 text-sm">
               <p className="font-bold text-white text-base">Aucun résultat pour cette recherche</p>

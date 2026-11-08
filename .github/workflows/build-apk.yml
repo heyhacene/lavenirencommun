@@ -109,6 +109,7 @@ jobs:
             - **Option C d'alertes** : notifications natives Android programmables + popups in-app
             - **Chiffrage budgétaire 2027** (+106,4 Md€ / +81,7 Md€ / 100 Md€) & 5 Plans sectoriels
             - **Lecteur continu** du livre avec sommaire interactif
+            - **Simulateur officiel d'impôts & succession LFI** : barème révolutionnaire à 14 tranches, CSG progressive (90% gagnants/stables), droits de succession (abattement 120k€ et plafond 12M€)
             - **Version Web & iOS (PWA)** : installation plein écran hors-ligne sur iPhone, iPad et PC
 
             APK signé et aligné, prêt à être installé directement sur votre smartphone ou tablette Android.

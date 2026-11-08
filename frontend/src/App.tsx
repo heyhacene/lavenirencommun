@@ -26,6 +26,7 @@ import { InAppAlertToast } from './components/InAppAlertToast';
 import { ReaderView } from './components/ReaderView';
 import { BudgetView } from './components/BudgetView';
 import { PlansView } from './components/PlansView';
+import { TaxSimulatorView } from './components/TaxSimulatorView';
 import {
   IconSearch,
   IconBell,
@@ -34,16 +35,17 @@ import {
   IconBudget,
   IconPlans,
   IconBookOpen,
+  IconCalculator,
   getProfileColor,
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.19';
+const APP_CURRENT_VERSION = 'v1.0.20';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'fiches' | 'budget' | 'plans' | 'lecteur'>('fiches');
+  const [activeTab, setActiveTab] = useState<'fiches' | 'plans' | 'simulateur' | 'budget' | 'lecteur'>('fiches');
   const [selectedProfile, setSelectedProfile] = useState<string>('tous');
   const [selectedSectionForModal, setSelectedSectionForModal] = useState<Section | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -526,17 +528,25 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: BUDGET & CHIFFRAGE */}
-        {activeTab === 'budget' && (
-          <BudgetView budget={data.budget} />
-        )}
-
-        {/* TAB 3: 5 PLANS SECTORIELS */}
+        {/* TAB 2: 5 PLANS SECTORIELS */}
         {activeTab === 'plans' && (
           <PlansView plans={data.plans} />
         )}
 
-        {/* TAB 4: LECTEUR CONTINU DU LIVRE */}
+        {/* TAB 3: SIMULATEUR D'IMPÔTS & SUCCESSION LFI */}
+        {activeTab === 'simulateur' && (
+          <TaxSimulatorView onOpenShare={() => setShareModalOpen(true)} />
+        )}
+
+        {/* TAB 4: BUDGET & CHIFFRAGE */}
+        {activeTab === 'budget' && (
+          <BudgetView
+            budget={data.budget}
+            onOpenSimulator={() => setActiveTab('simulateur')}
+          />
+        )}
+
+        {/* TAB 5: LECTEUR CONTINU DU LIVRE */}
         {activeTab === 'lecteur' && (
           <ReaderView
             data={data}
@@ -580,6 +590,9 @@ export default function App() {
         sections={data.sections}
         profiles={data.profiles}
         onSelectSection={s => setSelectedSectionForModal(s)}
+        onOpenSimulator={() => {
+          setActiveTab('simulateur');
+        }}
       />
 
       {/* Settings Modal (includes "By HO" signature, Alerts, Share & QR, Social, and Updates) */}
@@ -606,6 +619,10 @@ export default function App() {
         onOpenIosInstall={() => {
           setSettingsOpen(false);
           setIosInstallModalOpen(true);
+        }}
+        onOpenSimulator={() => {
+          setSettingsOpen(false);
+          setActiveTab('simulateur');
         }}
         currentVersion={APP_CURRENT_VERSION}
       />
@@ -656,7 +673,7 @@ export default function App() {
         {/* Tab 1: Fiches */}
         <button
           onClick={() => setActiveTab('fiches')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             activeTab === 'fiches'
               ? 'bg-purple-600/30 text-white font-bold border border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
               : 'text-purple-300/70 hover:text-white'
@@ -669,7 +686,7 @@ export default function App() {
         {/* Tab 2: 5 Plans */}
         <button
           onClick={() => setActiveTab('plans')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             activeTab === 'plans'
               ? 'bg-purple-600/30 text-white font-bold border border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
               : 'text-purple-300/70 hover:text-white'
@@ -679,21 +696,23 @@ export default function App() {
           <span className="text-[10px] tracking-wide font-bold">5 Plans</span>
         </button>
 
-        {/* Search quick button in center */}
+        {/* Tab 3: Simulateur Impôts & Héritage */}
         <button
-          onClick={() => setSearchModalOpen(true)}
-          className="flex flex-col items-center gap-1 py-0.5 px-3 text-purple-300/70 hover:text-white transition-all group"
+          onClick={() => setActiveTab('simulateur')}
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
+            activeTab === 'simulateur'
+              ? 'bg-emerald-600/30 text-white font-bold border border-emerald-400/50 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+              : 'text-purple-300/70 hover:text-white'
+          }`}
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-700 to-indigo-800 border border-purple-400/40 group-hover:border-purple-300 flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-110">
-            <IconSearch size={16} />
-          </div>
-          <span className="text-[10px] tracking-wide font-bold">Recherche</span>
+          <IconCalculator size={20} className={activeTab === 'simulateur' ? 'text-emerald-300' : 'text-emerald-400/80'} />
+          <span className="text-[10px] tracking-wide font-bold">Impôts</span>
         </button>
 
-        {/* Tab 3: Chiffrage Budget */}
+        {/* Tab 4: Chiffrage Budget */}
         <button
           onClick={() => setActiveTab('budget')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             activeTab === 'budget'
               ? 'bg-purple-600/30 text-white font-bold border border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
               : 'text-purple-300/70 hover:text-white'
@@ -703,10 +722,10 @@ export default function App() {
           <span className="text-[10px] tracking-wide font-bold">Budget</span>
         </button>
 
-        {/* Tab 4: Livre Intégral */}
+        {/* Tab 5: Livre Intégral */}
         <button
           onClick={() => setActiveTab('lecteur')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
             activeTab === 'lecteur'
               ? 'bg-purple-600/30 text-white font-bold border border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
               : 'text-purple-300/70 hover:text-white'

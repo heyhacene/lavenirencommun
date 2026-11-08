@@ -1,12 +1,13 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { Budget } from '../types/programme';
 import { IconChevronDown } from './Icons';
 
 interface BudgetViewProps {
   budget: Budget;
+  onOpenSimulator?: () => void;
 }
 
-export const BudgetView = ({ budget }: BudgetViewProps) => {
+export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
   const [activeTab, setActiveTab] = useState<'depenses' | 'recettes' | 'investissement'>('depenses');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
@@ -58,6 +59,35 @@ export const BudgetView = ({ budget }: BudgetViewProps) => {
           </div>
         </div>
       </div>
+
+      {/* Bannière d'accès direct au Simulateur d'impôts & succession */}
+      {onOpenSimulator && (
+        <div
+          onClick={onOpenSimulator}
+          className="group cursor-pointer p-4 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-purple-950/70 to-indigo-950/70 border border-emerald-500/40 hover:border-emerald-400/80 transition-all shadow-lg hover:shadow-emerald-900/30 flex items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
+              💼
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-emerald-300">Simulateur officiel LFI</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 font-bold">14 tranches</span>
+              </div>
+              <p className="text-sm font-bold text-white mt-0.5 group-hover:text-emerald-200 transition-colors">
+                Calculez précisément votre impôt et vos droits de succession
+              </p>
+              <p className="text-xs text-purple-200/70">
+                90% des Français paieront moins ou pas plus d'impôts avec notre barème progressif.
+              </p>
+            </div>
+          </div>
+          <span className="text-emerald-400 group-hover:translate-x-1 transition-transform text-lg flex-shrink-0 font-bold">
+            Accéder ➜
+          </span>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex bg-[#16062b] p-1.5 rounded-2xl border border-purple-500/20">

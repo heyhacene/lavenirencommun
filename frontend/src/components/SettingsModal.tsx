@@ -19,6 +19,7 @@ interface SettingsModalProps {
   onOpenShare: () => void;
   onOpenSocial: () => void;
   onOpenIosInstall?: () => void;
+  onOpenSimulator?: () => void;
   currentVersion?: string;
 }
 
@@ -31,7 +32,8 @@ export const SettingsModal = ({
   onOpenShare,
   onOpenSocial,
   onOpenIosInstall,
-  currentVersion = 'v1.0.19'
+  onOpenSimulator,
+  currentVersion = 'v1.0.20'
 }: SettingsModalProps) => {
   if (!isOpen) return null;
 
@@ -106,6 +108,37 @@ export const SettingsModal = ({
               </div>
             </div>
           </div>
+
+          {/* Card: Simulateur d'impôts & succession */}
+          {onOpenSimulator && (
+            <div
+              onClick={onOpenSimulator}
+              className="p-4 rounded-2xl bg-[#1b0833] border border-emerald-500/30 hover:border-emerald-400/60 transition-all cursor-pointer group shadow-lg active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-xl text-white shadow-md">
+                    <span className="text-xl leading-none">💼</span>
+                  </div>
+                  <div>
+                    <div className="font-extrabold text-sm text-white group-hover:text-emerald-300 transition-colors flex items-center gap-2">
+                      <span>Simulateur d'impôts &amp; succession</span>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        14 tranches
+                      </span>
+                    </div>
+                    <div className="text-xs text-purple-300/80 mt-0.5">
+                      Révolution fiscale LFI : calculez vos impôts et vos droits de succession
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-purple-400 group-hover:text-emerald-300 transition-colors">
+                  <IconChevronRight size={18} />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Card 2: Partager l'application & QR Code */}
           <div
