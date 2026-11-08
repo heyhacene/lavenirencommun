@@ -29,7 +29,7 @@ export const SettingsModal = ({
   onOpenUpdates,
   onOpenShare,
   onOpenSocial,
-  currentVersion = 'v1.0.17'
+  currentVersion = 'v1.0.18'
 }: SettingsModalProps) => {
   if (!isOpen) return null;
 

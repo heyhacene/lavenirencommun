@@ -36,7 +36,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.17';
+const APP_CURRENT_VERSION = 'v1.0.18';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
