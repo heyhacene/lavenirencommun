@@ -7,7 +7,9 @@ import {
   extractNotificationTarget,
   ensureNotificationChannel,
   requestNotificationPermission,
-  dispatchNotificationTarget
+  dispatchNotificationTarget,
+  getPendingNotificationTarget,
+  clearPendingNotificationTarget
 } from './services/notifications';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { CardFiche } from './components/CardFiche';
@@ -32,7 +34,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.13';
+const APP_CURRENT_VERSION = 'v1.0.14';
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -74,6 +76,7 @@ export default function App() {
 
     if (found) {
       console.log('[AEC] Opening section from notification tap:', found.title);
+      setInAppToastSection(null);
       setSettingsOpen(false);
       setAlertsManagerOpen(false);
       setUpdateModalOpen(false);
@@ -94,6 +97,15 @@ export default function App() {
         setData(progData);
         dataRef.current = progData;
         setLoading(false);
+
+        // Check if there was an early notification target (cold start)
+        const pendingTarget = getPendingNotificationTarget();
+        if (pendingTarget) {
+          clearPendingNotificationTarget();
+          setTimeout(() => {
+            openSectionFromTarget(pendingTarget, progData.sections);
+          }, 150);
+        }
 
         // Setup notification background task
         const cfg = loadMultiAlertConfig();
@@ -479,7 +491,11 @@ export default function App() {
       {/* Floating In-App Toast Alert */}
       <InAppAlertToast
         section={inAppToastSection}
-        onOpenFiche={s => setSelectedSectionForModal(s)}
+        onOpenFiche={s => {
+          setInAppToastSection(null);
+          setActiveTab('fiches');
+          setSelectedSectionForModal(s);
+        }}
         onDismiss={() => setInAppToastSection(null)}
       />
 

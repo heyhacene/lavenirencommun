@@ -14,9 +14,22 @@ export const InAppAlertToast = ({
 }: InAppAlertToastProps) => {
   if (!section) return null;
 
+  const handleClickToast = () => {
+    onOpenFiche(section);
+    onDismiss();
+  };
+
   return (
-    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[420px] z-[110]">
-      <div className="bg-[#170530]/95 backdrop-blur-xl text-white p-4.5 rounded-2xl shadow-2xl border-2 border-purple-500/50 flex flex-col gap-3 relative overflow-hidden">
+    <div
+      className="fixed left-4 right-4 sm:left-auto sm:right-6 sm:w-[420px] z-[120]"
+      style={{ top: 'max(env(safe-area-inset-top, 0px) + 12px, 16px)' }}
+    >
+      <div
+        onClick={handleClickToast}
+        className="bg-[#170530]/95 backdrop-blur-xl text-white p-4.5 rounded-2xl shadow-2xl border-2 border-purple-500/50 flex flex-col gap-3 relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all"
+        role="button"
+        tabIndex={0}
+      >
         {/* Top ambient glow */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none -mr-10 -mt-10" />
 
@@ -35,10 +48,14 @@ export const InAppAlertToast = ({
             </div>
           </div>
           <button
-            onClick={onDismiss}
-            className="text-slate-400 hover:text-white p-1 rounded-full transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss();
+            }}
+            className="text-slate-400 hover:text-white p-1.5 rounded-full transition-colors active:scale-90"
+            title="Fermer"
           >
-            <IconClose size={16} />
+            <IconClose size={18} />
           </button>
         </div>
 
@@ -54,19 +71,22 @@ export const InAppAlertToast = ({
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-1 text-[11px] text-purple-300/80 font-semibold">
             <IconStar size={14} className="text-amber-400 fill-amber-400" />
-            <span>Mesure clé du jour</span>
+            <span>Appuyez pour ouvrir la fiche</span>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={onDismiss}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
               className="text-xs text-slate-400 hover:text-white px-2 py-1 font-semibold"
             >
               Ignorer
             </button>
             <button
-              onClick={() => {
-                onOpenFiche(section);
-                onDismiss();
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClickToast();
               }}
               className="text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 px-3.5 py-1.5 rounded-xl flex items-center gap-1 transition-all shadow-md active:scale-95"
             >

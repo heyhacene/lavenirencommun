@@ -70,6 +70,19 @@ export function extractNotificationTarget(notification: any): NotificationPayloa
   return { sectionId, globalIndex, title };
 }
 
+// Early top-level listener: captures notification taps immediately upon app launch (including cold start)
+try {
+  LocalNotifications.addListener('localNotificationActionPerformed', action => {
+    console.log('[AEC] Module-level localNotificationActionPerformed received:', action);
+    const target = extractNotificationTarget(action.notification);
+    if (target) {
+      dispatchNotificationTarget(target);
+    }
+  });
+} catch (e) {
+  // LocalNotifications plugin not supported in standard web browser
+}
+
 export function registerNotificationTargetListener(
   listener: (target: NotificationPayloadTarget) => void
 ): () => void {
@@ -94,6 +107,14 @@ export function dispatchNotificationTarget(target: NotificationPayloadTarget) {
   } else {
     pendingNotificationTarget = target;
   }
+}
+
+export function getPendingNotificationTarget(): NotificationPayloadTarget | null {
+  return pendingNotificationTarget;
+}
+
+export function clearPendingNotificationTarget(): void {
+  pendingNotificationTarget = null;
 }
 
 export function hashStringToNumber(str: string): number {
@@ -237,6 +258,8 @@ export async function scheduleAllAlerts(
       title: `L'Avenir en commun • ${fiche.title}`,
       body: fiche.mesureCle || fiche.intro || 'Découvrez une mesure officielle du programme 2027.',
       channelId: NOTIFICATION_CHANNEL_ID,
+      smallIcon: 'ic_stat_aec',
+      iconColor: '#9333EA',
       schedule: {
         at: target,
         allowWhileIdle: true,
@@ -279,6 +302,12 @@ export async function triggerTestNotification(section: Section): Promise<boolean
           title: `L'Avenir en commun • ${section.title}`,
           body: section.mesureCle || section.intro || 'Test de notification du programme 2027.',
           channelId: NOTIFICATION_CHANNEL_ID,
+          smallIcon: 'ic_stat_aec',
+          iconColor: '#9333EA',
+          schedule: {
+            at: new Date(Date.now() + 250),
+            allowWhileIdle: true
+          },
           extra: {
             sectionId: section.id,
             globalIndex: section.globalIndex,
