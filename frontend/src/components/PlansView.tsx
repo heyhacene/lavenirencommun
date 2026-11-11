@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import type { Plan } from '../types/programme';
 import { IconChevronDown } from './Icons';
 
@@ -76,10 +76,10 @@ export const PlansView = ({ plans }: PlansViewProps) => {
                 >
                   <button
                     onClick={() => setExpandedSection(isExpanded ? null : idx)}
-                    className="w-full p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors"
+                    className="w-full p-4 sm:p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors gap-3"
                   >
-                    <div className="flex items-center gap-3.5">
-                      <span className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center shadow-md">
+                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                      <span className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center shadow-md select-none">
                         {idx + 1}
                       </span>
                       <h3 className="font-extrabold text-sm sm:text-base text-white">{sub.title}</h3>

@@ -27,6 +27,7 @@ import { ReaderView } from './components/ReaderView';
 import { BudgetView } from './components/BudgetView';
 import { PlansView } from './components/PlansView';
 import { TaxSimulatorView } from './components/TaxSimulatorView';
+import { PartiesModal } from './components/PartiesModal';
 import {
   IconSearch,
   IconBell,
@@ -40,7 +41,16 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.20';
+const APP_CURRENT_VERSION = 'v1.0.21';
+
+export const PARTY_TITLES: Record<number, string> = {
+  1: 'Pour une bifurcation écologique et sociale',
+  2: 'Une économie au service des besoins',
+  3: 'Mettre en sécurité sociale',
+  4: "Le goût du futur : aux nouvelles frontières de l'humanité",
+  5: 'Fonder la 6ᵉ République',
+  6: 'Un monde ordonné'
+};
 
 export default function App() {
   const [data, setData] = useState<ProgrammeData | null>(null);
@@ -55,6 +65,9 @@ export default function App() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [socialModalOpen, setSocialModalOpen] = useState(false);
   const [iosInstallModalOpen, setIosInstallModalOpen] = useState(false);
+  const [partiesModalOpen, setPartiesModalOpen] = useState(false);
+  const [selectedPartie, setSelectedPartie] = useState<number | null>(null);
+  const [showRandomTooltip, setShowRandomTooltip] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
   const [multiAlertConfig, setMultiAlertConfig] = useState<MultiAlertConfig>(loadMultiAlertConfig());
   const dataRef = useRef<ProgrammeData | null>(null);
@@ -109,6 +122,16 @@ export default function App() {
     }
   };
 
+  // Launch tooltip for random proposal dice button
+  useEffect(() => {
+    const showTimer = setTimeout(() => setShowRandomTooltip(true), 800);
+    const hideTimer = setTimeout(() => setShowRandomTooltip(false), 7000);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
   // Load programme.json on mount & setup notification channel
   useEffect(() => {
     ensureNotificationChannel();
@@ -117,6 +140,22 @@ export default function App() {
     fetch('./data/programme.json')
       .then(res => res.json())
       .then((progData: ProgrammeData) => {
+        // Enrich parties and sections with official titles if empty
+        if (progData.parties) {
+          progData.parties.forEach(p => {
+            if (!p.title && PARTY_TITLES[p.number]) {
+              p.title = PARTY_TITLES[p.number];
+            }
+          });
+        }
+        if (progData.sections) {
+          progData.sections.forEach(s => {
+            if (!s.partieTitle && PARTY_TITLES[s.partieNumber]) {
+              s.partieTitle = PARTY_TITLES[s.partieNumber];
+            }
+          });
+        }
+
         setData(progData);
         dataRef.current = progData;
         setLoading(false);
@@ -200,7 +239,8 @@ export default function App() {
       updateModalOpen ||
       shareModalOpen ||
       socialModalOpen ||
-      iosInstallModalOpen
+      iosInstallModalOpen ||
+      partiesModalOpen
     );
 
     if (isAnyModalOpen) {
@@ -210,6 +250,8 @@ export default function App() {
     const handlePopState = () => {
       if (selectedSectionForModal) {
         setSelectedSectionForModal(null);
+      } else if (partiesModalOpen) {
+        setPartiesModalOpen(false);
       } else if (iosInstallModalOpen) {
         setIosInstallModalOpen(false);
       } else if (shareModalOpen) {
@@ -229,7 +271,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen]);
+  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen]);
 
   // Native Capacitor back button listener
   useEffect(() => {
@@ -241,6 +283,8 @@ export default function App() {
         const handle = await CapApp.addListener('backButton', ({ canGoBack }) => {
           if (selectedSectionForModal) {
             setSelectedSectionForModal(null);
+          } else if (partiesModalOpen) {
+            setPartiesModalOpen(false);
           } else if (iosInstallModalOpen) {
             setIosInstallModalOpen(false);
           } else if (shareModalOpen) {
@@ -274,14 +318,20 @@ export default function App() {
     return () => {
       if (removeListener) removeListener();
     };
-  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, activeTab]);
+  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, activeTab]);
 
-  // Filtered fiches for the main card list
+  // Filtered fiches for the main card list (by profile and/or by party)
   const filteredSections = useMemo(() => {
     if (!data) return [];
-    if (selectedProfile === 'tous') return data.sections;
-    return data.sections.filter(s => s.profiles && s.profiles.includes(selectedProfile));
-  }, [data, selectedProfile]);
+    let list = data.sections;
+    if (selectedPartie !== null) {
+      list = list.filter(s => s.partieNumber === selectedPartie);
+    }
+    if (selectedProfile !== 'tous') {
+      list = list.filter(s => s.profiles && s.profiles.includes(selectedProfile));
+    }
+    return list;
+  }, [data, selectedProfile, selectedPartie]);
 
   const activeAlertsCount = multiAlertConfig.globalEnabled
     ? multiAlertConfig.schedules.filter(s => s.enabled).length
@@ -348,14 +398,40 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Proposition au hasard header button */}
-          <button
-            onClick={handleOpenRandomFiche}
-            className="w-10 h-10 rounded-xl bg-purple-950/60 border border-amber-500/40 text-amber-300 hover:text-white hover:bg-amber-600/30 transition-all flex items-center justify-center active:scale-95 text-base"
-            title="Une proposition au hasard"
-          >
-            🎲
-          </button>
+          {/* Proposition au hasard header button with launch tooltip */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowRandomTooltip(false);
+                handleOpenRandomFiche();
+              }}
+              className="w-10 h-10 rounded-xl bg-purple-950/60 border border-amber-500/40 text-amber-300 hover:text-white hover:bg-amber-600/30 transition-all flex items-center justify-center active:scale-95 text-base relative"
+              title="Une proposition au hasard"
+            >
+              🎲
+            </button>
+
+            {/* Launch Tooltip Bubble */}
+            {showRandomTooltip && (
+              <div
+                onClick={() => {
+                  setShowRandomTooltip(false);
+                  handleOpenRandomFiche();
+                }}
+                className="absolute top-full mt-2.5 right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 z-50 animate-bounce cursor-pointer select-none"
+                style={{ animationDuration: '2s' }}
+              >
+                {/* Pointer arrow */}
+                <div className="absolute -top-1 right-3.5 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-2.5 h-2.5 bg-amber-500 rotate-45 rounded-[2px]" />
+                
+                {/* Bubble text */}
+                <div className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 text-slate-950 font-black text-[11px] shadow-[0_6px_20px_rgba(245,158,11,0.5)] border border-amber-200/50 whitespace-nowrap">
+                  <span>🎲</span>
+                  <span>Une mesure au hasard</span>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Search Button */}
           <button
@@ -415,41 +491,102 @@ export default function App() {
                   </p>
                 </div>
 
-                {/* 4 Stitch Campaign Stat Cards */}
+                {/* 4 Stitch Campaign Stat Cards (Clickable & Interactive) */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-                  <div className="stitch-stat-box">
-                    <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-fuchsia-300">
-                      1 069
+                  {/* Card 1: 1 069 Mesures concrètes -> Ouvre la recherche */}
+                  <div
+                    onClick={() => setSearchModalOpen(true)}
+                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    title="Rechercher parmi les 1 069 mesures concrètes"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-fuchsia-300">
+                        1 069
+                      </div>
+                      <span className="text-[11px] text-purple-400 group-hover:text-white transition-colors">
+                        🔍
+                      </span>
                     </div>
                     <div className="text-[11px] font-bold text-purple-300 uppercase tracking-wider mt-0.5">
                       Mesures concrètes
                     </div>
+                    <div className="text-[10px] text-purple-400/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-purple-200">
+                      <span>Rechercher</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                    </div>
                   </div>
 
-                  <div className="stitch-stat-box">
-                    <div className="text-2xl font-black text-amber-300">
-                      111
+                  {/* Card 2: 111 Fiches thématiques -> Fait défiler vers les fiches */}
+                  <div
+                    onClick={() => {
+                      setSelectedPartie(null);
+                      setSelectedProfile('tous');
+            const el = document.getElementById("reader-partie-" + pNum);
+
+                    }}
+                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    title="Voir les 111 fiches thématiques"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl font-black text-amber-300">
+                        111
+                      </div>
+                      <span className="text-[11px] text-amber-400 group-hover:text-white transition-colors">
+                        🗂️
+                      </span>
                     </div>
                     <div className="text-[11px] font-bold text-purple-300 uppercase tracking-wider mt-0.5">
                       Fiches thématiques
                     </div>
+                    <div className="text-[10px] text-amber-400/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-amber-200">
+                      <span>Voir la liste</span>
+                      <span className="group-hover:translate-y-0.5 transition-transform">↓</span>
+                    </div>
                   </div>
 
-                  <div className="stitch-stat-box">
-                    <div className="text-2xl font-black text-emerald-300">
-                      6
+                  {/* Card 3: 6 Grandes parties -> Ouvre la modale des 6 parties */}
+                  <div
+                    onClick={() => setPartiesModalOpen(true)}
+                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    title="Choisir et explorer les 6 Grandes Parties du programme"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl font-black text-emerald-300">
+                        6
+                      </div>
+                      <span className="text-[11px] text-emerald-400 group-hover:text-white transition-colors">
+                        🏛️
+                      </span>
                     </div>
                     <div className="text-[11px] font-bold text-purple-300 uppercase tracking-wider mt-0.5">
                       Grandes parties
                     </div>
+                    <div className="text-[10px] text-emerald-400/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-emerald-200">
+                      <span>Choisir une partie</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                    </div>
                   </div>
 
-                  <div className="stitch-stat-box">
-                    <div className="text-2xl font-black text-rose-300">
-                      100 Md€
+                  {/* Card 4: 100 Md€ Investissement d'urgence -> Ouvre l'onglet Budget */}
+                  <div
+                    onClick={() => setActiveTab('budget')}
+                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    title="Consulter le chiffrage et l'investissement d'urgence de 100 Md€"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl font-black text-rose-300">
+                        100 Md€
+                      </div>
+                      <span className="text-[11px] text-rose-400 group-hover:text-white transition-colors">
+                        💶
+                      </span>
                     </div>
                     <div className="text-[11px] font-bold text-purple-300 uppercase tracking-wider mt-0.5">
                       Investissement d'urgence
+                    </div>
+                    <div className="text-[10px] text-rose-400/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-rose-200">
+                      <span>Voir le budget</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                     </div>
                   </div>
                 </div>
@@ -482,8 +619,37 @@ export default function App() {
               </div>
             </div>
 
+            {/* Active selected Partie Banner */}
+            {selectedPartie !== null && (
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/90 via-[#27074d] to-indigo-950 border border-purple-400/40 text-xs shadow-lg animate-fadeIn">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="font-black text-amber-300 uppercase px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-400/40 text-[11px] flex-shrink-0">
+                    Partie {selectedPartie}
+                  </span>
+                  <span className="font-extrabold text-white truncate text-xs sm:text-sm">
+                    {data.parties.find(p => p.number === selectedPartie)?.title || ("Partie " + selectedPartie)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => setPartiesModalOpen(true)}
+                    className="px-2.5 py-1 rounded-lg bg-purple-800/80 hover:bg-purple-700 text-purple-200 text-[11px] font-bold transition-all active:scale-95"
+                  >
+                    Changer
+                  </button>
+                  <button
+                    onClick={() => setSelectedPartie(null)}
+                    className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-[11px] font-bold transition-all active:scale-95"
+                    title="Afficher toutes les parties"
+                  >
+                    ✕ Tout voir
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Citizen Profile Filter Ribbon */}
-            <div className="space-y-2">
+            <div id="fiches-grid-section" className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
@@ -625,6 +791,31 @@ export default function App() {
           setActiveTab('simulateur');
         }}
         currentVersion={APP_CURRENT_VERSION}
+      />
+
+      {/* Dedicated 6 Parties Selection Modal */}
+      <PartiesModal
+        isOpen={partiesModalOpen}
+        onClose={() => setPartiesModalOpen(false)}
+        parties={data.parties}
+        sections={data.sections}
+        selectedPartie={selectedPartie}
+        onSelectPartie={pNum => {
+          setSelectedPartie(pNum);
+          setPartiesModalOpen(false);
+          setTimeout(() => {
+            document.getElementById('fiches-grid-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }}
+        onOpenReaderPartie={pNum => {
+          setPartiesModalOpen(false);
+          setActiveTab('lecteur');
+          setTimeout(() => {
+            const el = document.getElementById("reader-partie-" + pNum);
+
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }}
       />
 
       {/* Dedicated iOS & Web PWA Install Guide Modal */}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Section, Profile } from '../types/programme';
 import {
   IconClose,
@@ -29,6 +29,14 @@ export const ModalFicheIntegrale = ({
   onRandomFiche
 }: ModalFicheIntegraleProps) => {
   const [copied, setCopied] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Always reset scroll to top when opening or switching section
+  useEffect(() => {
+    if (bodyRef.current) {
+      bodyRef.current.scrollTop = 0;
+    }
+  }, [section?.id]);
 
   if (!section) return null;
 
@@ -109,7 +117,7 @@ export const ModalFicheIntegrale = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto px-6 py-6 space-y-6 flex-1">
+        <div ref={bodyRef} className="overflow-y-auto px-6 py-6 space-y-6 flex-1">
           {/* Breadcrumb info */}
           <div className="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-2">
             <span>Partie {section.partieNumber} : {section.partieTitle}</span>
@@ -160,7 +168,7 @@ export const ModalFicheIntegrale = ({
                     key={idx}
                     className="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-950/30 border border-purple-800/30 hover:border-purple-700/60 transition-colors text-sm leading-relaxed"
                   >
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md">
+                    <span className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md select-none">
                       {idx + 1}
                     </span>
                     <span className="text-slate-100 font-medium">
@@ -211,7 +219,7 @@ export const ModalFicheIntegrale = ({
         <div className="sticky bottom-0 bg-[#16062b] border-t border-purple-500/20 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2 pb-[max(1rem,env(safe-area-inset-bottom,16px))]">
           {onRandomFiche ? (
             <button
-              onClick={onRandomFiche}
+              onClick={() => { if (bodyRef.current) bodyRef.current.scrollTop = 0; onRandomFiche(); }}
               className="px-4 py-2.5 bg-gradient-to-r from-purple-900/90 to-amber-950/80 hover:from-purple-800 hover:to-amber-900 text-amber-300 hover:text-white border border-amber-500/40 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5"
               title="Passer à une autre proposition au hasard"
             >

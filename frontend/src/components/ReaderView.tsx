@@ -244,7 +244,7 @@ export const ReaderView = ({ data, onOpenSectionModal }: ReaderViewProps) => {
                               key={mIdx}
                               className={`flex items-start gap-2.5 text-slate-200 ${textSizeClasses[fontSize]}`}
                             >
-                              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-900/80 text-purple-200 font-black text-[11px] flex items-center justify-center mt-0.5 border border-purple-700/50">
+                              <span className="flex-shrink-0 w-5 h-5 min-w-[20px] min-h-[20px] max-w-[20px] max-h-[20px] aspect-square rounded-full bg-purple-900/80 text-purple-200 font-black text-[11px] flex items-center justify-center mt-0.5 border border-purple-700/50 select-none">
                                 {mIdx + 1}
                               </span>
                               <span>{m}</span>
