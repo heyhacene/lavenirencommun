@@ -79,7 +79,10 @@ export const PlansView = ({ plans }: PlansViewProps) => {
                     className="w-full p-4 sm:p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors gap-3"
                   >
                     <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                      <span className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center shadow-md select-none">
+                      <span
+                        className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center shadow-md select-none self-center"
+                        style={{ width: '28px', height: '28px', minWidth: '28px', minHeight: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '9999px', flexShrink: 0 }}
+                      >
                         {idx + 1}
                       </span>
                       <h3 className="font-extrabold text-sm sm:text-base text-white">{sub.title}</h3>

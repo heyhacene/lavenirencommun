@@ -33,7 +33,7 @@ export const SettingsModal = ({
   onOpenSocial,
   onOpenIosInstall,
   onOpenSimulator,
-  currentVersion = 'v1.0.21'
+  currentVersion = 'v1.0.26'
 }: SettingsModalProps) => {
   if (!isOpen) return null;
 

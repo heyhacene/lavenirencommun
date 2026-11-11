@@ -97,19 +97,18 @@ export const PartiesModal: React.FC<PartiesModalProps> = ({
         {/* Scrollable Content */}
         <div className="overflow-y-auto px-5 sm:px-6 py-5 space-y-3.5 flex-1">
           {/* Option: Tout voir */}
-          <div
-            onClick={() => {
-              onSelectPartie(null);
-              onClose();
-            }}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group active:scale-[0.99] ${
+          <button
+            type="button"
+            onClick={() => onSelectPartie(null)}
+            className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group active:scale-[0.99] select-none ${
               selectedPartie === null
                 ? 'bg-purple-600/30 border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
                 : 'bg-[#18082f]/80 border-purple-800/40 hover:border-purple-600'
             }`}
+            style={{ touchAction: 'manipulation' }}
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-purple-900/60 border border-purple-500/40 flex items-center justify-center text-purple-200">
+              <div className="w-9 h-9 rounded-xl bg-purple-900/60 border border-purple-500/40 flex items-center justify-center text-purple-200 flex-shrink-0">
                 <IconCards size={18} />
               </div>
               <div>
@@ -127,24 +126,26 @@ export const PartiesModal: React.FC<PartiesModalProps> = ({
               </div>
             </div>
 
-            <IconChevronRight size={18} className="text-purple-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-          </div>
+            <IconChevronRight size={18} className="text-purple-400 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0" />
+          </button>
 
           {/* 6 Parties List */}
           {parties.map(p => {
             const isSelected = selectedPartie === p.number;
             const accent = partyAccents[p.number] || partyAccents[1];
-            const pSections = sections.filter(s => s.partieNumber === p.number);
+            const pSections = sections ? sections.filter(s => s.partieNumber === p.number) : [];
             const chaptersCount = p.chapters ? p.chapters.length : 0;
 
             return (
               <div
                 key={p.id || p.number}
-                className={`p-4 sm:p-5 rounded-2xl border bg-gradient-to-r ${accent.gradient} transition-all shadow-md group ${
+                onClick={() => onSelectPartie(p.number)}
+                className={`p-4 sm:p-5 rounded-2xl border bg-gradient-to-r ${accent.gradient} transition-all shadow-md group cursor-pointer active:scale-[0.99] select-none ${
                   isSelected
                     ? 'border-purple-400 ring-2 ring-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
                     : `border-purple-900/40 ${accent.border}`
                 }`}
+                style={{ touchAction: 'manipulation' }}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -170,11 +171,13 @@ export const PartiesModal: React.FC<PartiesModalProps> = ({
                   {/* Actions buttons */}
                   <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-purple-900/40 flex-shrink-0">
                     <button
-                      onClick={() => {
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onSelectPartie(p.number);
-                        onClose();
                       }}
                       className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                      style={{ touchAction: 'manipulation' }}
                       title={`Afficher les ${pSections.length} fiches de la Partie ${p.number}`}
                     >
                       <span>Voir les fiches ({pSections.length})</span>
@@ -183,8 +186,13 @@ export const PartiesModal: React.FC<PartiesModalProps> = ({
 
                     {onOpenReaderPartie && (
                       <button
-                        onClick={() => onOpenReaderPartie(p.number)}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenReaderPartie(p.number);
+                        }}
                         className="px-3 py-2 rounded-xl bg-purple-950/80 hover:bg-purple-900 active:scale-95 text-purple-200 hover:text-white border border-purple-700/50 font-bold text-xs flex items-center gap-1.5 transition-all"
+                        style={{ touchAction: 'manipulation' }}
                         title={`Lire la Partie ${p.number} dans le livre`}
                       >
                         <IconBookOpen size={14} />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { Capacitor } from '@capacitor/core';
 import type { ProgrammeData, Section, MultiAlertConfig } from './types/programme';
 import {
   loadMultiAlertConfig,
@@ -41,7 +42,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.21';
+const APP_CURRENT_VERSION = 'v1.0.26';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
@@ -229,8 +230,10 @@ export default function App() {
     };
   }, []);
 
-  // Back button handling: native Android back button + browser history popstate
+  // Back button handling: browser history popstate (PWA / Web only)
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) return;
+
     const isAnyModalOpen = Boolean(
       selectedSectionForModal ||
       searchModalOpen ||
@@ -248,25 +251,15 @@ export default function App() {
     }
 
     const handlePopState = () => {
-      if (selectedSectionForModal) {
-        setSelectedSectionForModal(null);
-      } else if (partiesModalOpen) {
-        setPartiesModalOpen(false);
-      } else if (iosInstallModalOpen) {
-        setIosInstallModalOpen(false);
-      } else if (shareModalOpen) {
-        setShareModalOpen(false);
-      } else if (socialModalOpen) {
-        setSocialModalOpen(false);
-      } else if (alertsManagerOpen) {
-        setAlertsManagerOpen(false);
-      } else if (updateModalOpen) {
-        setUpdateModalOpen(false);
-      } else if (settingsOpen) {
-        setSettingsOpen(false);
-      } else if (searchModalOpen) {
-        setSearchModalOpen(false);
-      }
+      setSelectedSectionForModal(null);
+      setPartiesModalOpen(false);
+      setIosInstallModalOpen(false);
+      setShareModalOpen(false);
+      setSocialModalOpen(false);
+      setAlertsManagerOpen(false);
+      setUpdateModalOpen(false);
+      setSettingsOpen(false);
+      setSearchModalOpen(false);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -280,7 +273,7 @@ export default function App() {
     const setupCapacitorBack = async () => {
       try {
         const { App: CapApp } = await import('@capacitor/app');
-        const handle = await CapApp.addListener('backButton', ({ canGoBack }) => {
+        const handle = await CapApp.addListener('backButton', () => {
           if (selectedSectionForModal) {
             setSelectedSectionForModal(null);
           } else if (partiesModalOpen) {
@@ -301,8 +294,6 @@ export default function App() {
             setSearchModalOpen(false);
           } else if (activeTab !== 'fiches') {
             setActiveTab('fiches');
-          } else if (canGoBack) {
-            window.history.back();
           } else {
             CapApp.exitApp();
           }
@@ -494,9 +485,11 @@ export default function App() {
                 {/* 4 Stitch Campaign Stat Cards (Clickable & Interactive) */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
                   {/* Card 1: 1 069 Mesures concrètes -> Ouvre la recherche */}
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setSearchModalOpen(true)}
-                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    className="stitch-stat-box text-left w-full cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    style={{ touchAction: 'manipulation' }}
                     title="Rechercher parmi les 1 069 mesures concrètes"
                   >
                     <div className="flex items-center justify-between">
@@ -514,17 +507,27 @@ export default function App() {
                       <span>Rechercher</span>
                       <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                     </div>
-                  </div>
+                  </button>
 
                   {/* Card 2: 111 Fiches thématiques -> Fait défiler vers les fiches */}
-                  <div
+                  <button
+                    type="button"
                     onClick={() => {
                       setSelectedPartie(null);
                       setSelectedProfile('tous');
                       const el = document.getElementById('fiches-grid-section');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      if (el) {
+                        try {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } catch (e) {
+                          window.scrollTo({ top: el.offsetTop - 70, behavior: 'smooth' });
+                        }
+                      } else {
+                        window.scrollTo({ top: 350, behavior: 'smooth' });
+                      }
                     }}
-                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    className="stitch-stat-box text-left w-full cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    style={{ touchAction: 'manipulation' }}
                     title="Voir les 111 fiches thématiques"
                   >
                     <div className="flex items-center justify-between">
@@ -542,12 +545,14 @@ export default function App() {
                       <span>Voir la liste</span>
                       <span className="group-hover:translate-y-0.5 transition-transform">↓</span>
                     </div>
-                  </div>
+                  </button>
 
                   {/* Card 3: 6 Grandes parties -> Ouvre la modale des 6 parties */}
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setPartiesModalOpen(true)}
-                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    className="stitch-stat-box text-left w-full cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    style={{ touchAction: 'manipulation' }}
                     title="Choisir et explorer les 6 Grandes Parties du programme"
                   >
                     <div className="flex items-center justify-between">
@@ -565,12 +570,14 @@ export default function App() {
                       <span>Choisir une partie</span>
                       <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                     </div>
-                  </div>
+                  </button>
 
                   {/* Card 4: 100 Md€ Investissement d'urgence -> Ouvre l'onglet Budget */}
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setActiveTab('budget')}
-                    className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    className="stitch-stat-box text-left w-full cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
+                    style={{ touchAction: 'manipulation' }}
                     title="Consulter le chiffrage et l'investissement d'urgence de 100 Md€"
                   >
                     <div className="flex items-center justify-between">
@@ -588,7 +595,7 @@ export default function App() {
                       <span>Voir le budget</span>
                       <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                     </div>
-                  </div>
+                  </button>
                 </div>
 
                 {/* Search Bar & Random Proposal Action Row */}
@@ -804,7 +811,14 @@ export default function App() {
           setSelectedPartie(pNum);
           setPartiesModalOpen(false);
           setTimeout(() => {
-            document.getElementById('fiches-grid-section')?.scrollIntoView({ behavior: 'smooth' });
+            const el = document.getElementById('fiches-grid-section');
+            if (el) {
+              try {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } catch (e) {
+                window.scrollTo({ top: el.offsetTop - 70, behavior: 'smooth' });
+              }
+            }
           }, 100);
         }}
         onOpenReaderPartie={pNum => {
@@ -812,8 +826,13 @@ export default function App() {
           setActiveTab('lecteur');
           setTimeout(() => {
             const el = document.getElementById("reader-partie-" + pNum);
-
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (el) {
+              try {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } catch (e) {
+                window.scrollTo({ top: el.offsetTop - 70, behavior: 'smooth' });
+              }
+            }
           }, 150);
         }}
       />

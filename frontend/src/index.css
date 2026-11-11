@@ -99,6 +99,13 @@ svg {
   border-radius: 16px;
   padding: 12px 14px;
   transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(168, 85, 247, 0.25);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  display: block;
+  width: 100%;
 }
 
 .stitch-stat-box:hover {

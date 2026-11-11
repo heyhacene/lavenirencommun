@@ -168,7 +168,10 @@ export const ModalFicheIntegrale = ({
                     key={idx}
                     className="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-950/30 border border-purple-800/30 hover:border-purple-700/60 transition-colors text-sm leading-relaxed"
                   >
-                    <span className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md select-none">
+                    <span
+                      className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md select-none"
+                      style={{ width: '28px', height: '28px', minWidth: '28px', minHeight: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '9999px', flexShrink: 0 }}
+                    >
                       {idx + 1}
                     </span>
                     <span className="text-slate-100 font-medium">
