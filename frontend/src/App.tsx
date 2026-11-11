@@ -26,6 +26,7 @@ import { IosInstallBanner } from './components/IosInstallBanner';
 import { InAppAlertToast } from './components/InAppAlertToast';
 import { ReaderView } from './components/ReaderView';
 import { BudgetView } from './components/BudgetView';
+import { type BudgetFicheKey } from './components/BudgetDetailModal';
 import { PlansView } from './components/PlansView';
 import { TaxSimulatorView } from './components/TaxSimulatorView';
 import { PartiesModal } from './components/PartiesModal';
@@ -42,7 +43,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.26';
+const APP_CURRENT_VERSION = 'v1.0.27';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
@@ -67,6 +68,7 @@ export default function App() {
   const [socialModalOpen, setSocialModalOpen] = useState(false);
   const [iosInstallModalOpen, setIosInstallModalOpen] = useState(false);
   const [partiesModalOpen, setPartiesModalOpen] = useState(false);
+  const [budgetFicheModal, setBudgetFicheModal] = useState<BudgetFicheKey | null>(null);
   const [selectedPartie, setSelectedPartie] = useState<number | null>(null);
   const [showRandomTooltip, setShowRandomTooltip] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
@@ -243,7 +245,8 @@ export default function App() {
       shareModalOpen ||
       socialModalOpen ||
       iosInstallModalOpen ||
-      partiesModalOpen
+      partiesModalOpen ||
+      budgetFicheModal
     );
 
     if (isAnyModalOpen) {
@@ -253,6 +256,7 @@ export default function App() {
     const handlePopState = () => {
       setSelectedSectionForModal(null);
       setPartiesModalOpen(false);
+      setBudgetFicheModal(null);
       setIosInstallModalOpen(false);
       setShareModalOpen(false);
       setSocialModalOpen(false);
@@ -264,7 +268,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen]);
+  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, budgetFicheModal]);
 
   // Native Capacitor back button listener
   useEffect(() => {
@@ -274,7 +278,9 @@ export default function App() {
       try {
         const { App: CapApp } = await import('@capacitor/app');
         const handle = await CapApp.addListener('backButton', () => {
-          if (selectedSectionForModal) {
+          if (budgetFicheModal) {
+            setBudgetFicheModal(null);
+          } else if (selectedSectionForModal) {
             setSelectedSectionForModal(null);
           } else if (partiesModalOpen) {
             setPartiesModalOpen(false);
@@ -309,7 +315,7 @@ export default function App() {
     return () => {
       if (removeListener) removeListener();
     };
-  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, activeTab]);
+  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, budgetFicheModal, activeTab]);
 
   // Filtered fiches for the main card list (by profile and/or by party)
   const filteredSections = useMemo(() => {
@@ -716,6 +722,8 @@ export default function App() {
           <BudgetView
             budget={data.budget}
             onOpenSimulator={() => setActiveTab('simulateur')}
+            activeFicheModal={budgetFicheModal}
+            onOpenFicheModal={setBudgetFicheModal}
           />
         )}
 

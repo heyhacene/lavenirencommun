@@ -1,15 +1,43 @@
 import { useState } from 'react';
 import type { Budget } from '../types/programme';
-import { IconChevronDown } from './Icons';
+import { IconChevronDown, IconCalculator } from './Icons';
+import { BudgetDetailModal, ALLEGEMENTS_DATA, type BudgetFicheKey } from './BudgetDetailModal';
 
-interface BudgetViewProps {
+export interface BudgetViewProps {
   budget: Budget;
   onOpenSimulator?: () => void;
+  activeFicheModal?: BudgetFicheKey | null;
+  onOpenFicheModal?: (key: BudgetFicheKey | null) => void;
 }
 
-export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
-  const [activeTab, setActiveTab] = useState<'depenses' | 'recettes' | 'investissement'>('depenses');
+export const BudgetView = ({
+  budget,
+  onOpenSimulator,
+  activeFicheModal,
+  onOpenFicheModal
+}: BudgetViewProps) => {
+  const [activeTab, setActiveTab] = useState<BudgetFicheKey>('depenses');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [internalFicheModal, setInternalFicheModal] = useState<BudgetFicheKey | null>(null);
+
+  const currentFicheModal = onOpenFicheModal !== undefined ? activeFicheModal : internalFicheModal;
+
+  const handleOpenFiche = (key: BudgetFicheKey) => {
+    setActiveTab(key);
+    if (onOpenFicheModal) {
+      onOpenFicheModal(key);
+    } else {
+      setInternalFicheModal(key);
+    }
+  };
+
+  const handleCloseFiche = () => {
+    if (onOpenFicheModal) {
+      onOpenFicheModal(null);
+    } else {
+      setInternalFicheModal(null);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto pb-24 space-y-6 text-white">
@@ -27,35 +55,91 @@ export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
             {budget.subtitle}
           </p>
 
-          {/* 4 Summary Stats */}
+          {/* 4 Interactive Summary Stats Cards -> Ouvre la Fiche Détaillée */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-6">
-            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-rose-500/30 text-center shadow-lg">
-              <span className="text-[11px] text-rose-300 block font-bold uppercase tracking-wider">Dépenses</span>
-              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+            {/* Pavé 1: Dépenses */}
+            <button
+              type="button"
+              onClick={() => handleOpenFiche('depenses')}
+              className="bg-[#18082f]/90 hover:bg-[#250d44] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-rose-500/40 hover:border-rose-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              style={{ touchAction: 'manipulation' }}
+              title="Consulter la fiche détaillée des dépenses (+106,4 Md€)"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-rose-300 font-bold uppercase tracking-wider">Dépenses</span>
+                <span className="text-xs text-rose-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
+              <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.depensesAnnuelles}
               </span>
-            </div>
+              <div className="text-[10px] text-rose-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-rose-200">
+                <span>Fiche détaillée</span>
+                <span className="text-[9px]">➔</span>
+              </div>
+            </button>
 
-            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-emerald-500/30 text-center shadow-lg">
-              <span className="text-[11px] text-emerald-300 block font-bold uppercase tracking-wider">Recettes</span>
-              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+            {/* Pavé 2: Recettes */}
+            <button
+              type="button"
+              onClick={() => handleOpenFiche('recettes')}
+              className="bg-[#18082f]/90 hover:bg-[#122b27] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-emerald-500/40 hover:border-emerald-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              style={{ touchAction: 'manipulation' }}
+              title="Consulter la fiche détaillée des recettes (+81,7 Md€)"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-emerald-300 font-bold uppercase tracking-wider">Recettes</span>
+                <span className="text-xs text-emerald-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
+              <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.recettesAnnuelles}
               </span>
-            </div>
+              <div className="text-[10px] text-emerald-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-emerald-200">
+                <span>Fiche détaillée</span>
+                <span className="text-[9px]">➔</span>
+              </div>
+            </button>
 
-            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-amber-500/30 text-center shadow-lg">
-              <span className="text-[11px] text-amber-300 block font-bold uppercase tracking-wider">Allègements</span>
-              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+            {/* Pavé 3: Allègements */}
+            <button
+              type="button"
+              onClick={() => handleOpenFiche('allegements')}
+              className="bg-[#18082f]/90 hover:bg-[#302111] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-amber-500/40 hover:border-amber-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              style={{ touchAction: 'manipulation' }}
+              title="Consulter la fiche détaillée des allègements et baisses d'impôts (-24,7 Md€)"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-amber-300 font-bold uppercase tracking-wider">Allègements</span>
+                <span className="text-xs text-amber-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
+              <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.baissesImpotsEtCouts}
               </span>
-            </div>
+              <div className="text-[10px] text-amber-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-amber-200">
+                <span>Fiche détaillée</span>
+                <span className="text-[9px]">➔</span>
+              </div>
+            </button>
 
-            <div className="bg-[#18082f]/80 backdrop-blur-md rounded-2xl p-3.5 border border-cyan-500/30 text-center shadow-lg">
-              <span className="text-[11px] text-cyan-300 block font-bold uppercase tracking-wider">Pôle Invest.</span>
-              <span className="text-lg sm:text-xl font-black text-white mt-0.5 block">
+            {/* Pavé 4: Pôle Investissement */}
+            <button
+              type="button"
+              onClick={() => handleOpenFiche('investissement')}
+              className="bg-[#18082f]/90 hover:bg-[#0c263d] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-cyan-500/40 hover:border-cyan-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              style={{ touchAction: 'manipulation' }}
+              title="Consulter la fiche détaillée du Grand Pôle Public d'Investissement (100 Md€)"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-cyan-300 font-bold uppercase tracking-wider">Pôle Invest.</span>
+                <span className="text-xs text-cyan-400 group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
+              <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.polePublicInvestissement}
               </span>
-            </div>
+              <div className="text-[10px] text-cyan-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-cyan-200">
+                <span>Fiche détaillée</span>
+                <span className="text-[9px]">➔</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -65,6 +149,7 @@ export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
         <div
           onClick={onOpenSimulator}
           className="group cursor-pointer p-4 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-purple-950/70 to-indigo-950/70 border border-emerald-500/40 hover:border-emerald-400/80 transition-all shadow-lg hover:shadow-emerald-900/30 flex items-center justify-between gap-4"
+          style={{ touchAction: 'manipulation' }}
         >
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
@@ -89,37 +174,55 @@ export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex bg-[#16062b] p-1.5 rounded-2xl border border-purple-500/20">
+      {/* 4 Tabs Selector */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 bg-[#16062b] p-1.5 rounded-2xl border border-purple-500/20 gap-1">
         <button
+          type="button"
           onClick={() => setActiveTab('depenses')}
-          className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all ${
+          className={`py-2.5 px-2 rounded-xl font-black text-xs transition-all text-center ${
             activeTab === 'depenses'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-              : 'text-purple-300 hover:text-white'
+              ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white hover:bg-purple-900/30'
           }`}
+          style={{ touchAction: 'manipulation' }}
         >
-          Où va l'argent ? (Dépenses)
+          Dépenses (+106,4 Md€)
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('recettes')}
-          className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all ${
+          className={`py-2.5 px-2 rounded-xl font-black text-xs transition-all text-center ${
             activeTab === 'recettes'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-              : 'text-purple-300 hover:text-white'
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white hover:bg-purple-900/30'
           }`}
+          style={{ touchAction: 'manipulation' }}
         >
-          D'où vient l'argent ? (Recettes)
+          Recettes (+81,7 Md€)
         </button>
         <button
-          onClick={() => setActiveTab('investissement')}
-          className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all ${
-            activeTab === 'investissement'
-              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-              : 'text-purple-300 hover:text-white'
+          type="button"
+          onClick={() => setActiveTab('allegements')}
+          className={`py-2.5 px-2 rounded-xl font-black text-xs transition-all text-center ${
+            activeTab === 'allegements'
+              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white hover:bg-purple-900/30'
           }`}
+          style={{ touchAction: 'manipulation' }}
         >
-          Pôle Investissement
+          Allègements (-24,7 Md€)
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('investissement')}
+          className={`py-2.5 px-2 rounded-xl font-black text-xs transition-all text-center ${
+            activeTab === 'investissement'
+              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md'
+              : 'text-purple-300 hover:text-white hover:bg-purple-900/30'
+          }`}
+          style={{ touchAction: 'manipulation' }}
+        >
+          Pôle Invest. (100 Md€)
         </button>
       </div>
 
@@ -137,8 +240,10 @@ export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
                 className="glass-panel rounded-2xl border border-purple-500/20 overflow-hidden shadow-lg transition-colors"
               >
                 <button
+                  type="button"
                   onClick={() => setExpandedIndex(isExpanded ? null : idx)}
                   className="w-full p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors"
+                  style={{ touchAction: 'manipulation' }}
                 >
                   <div className="flex items-center gap-3.5">
                     <span className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 shadow-sm" />
@@ -195,7 +300,71 @@ export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
         </div>
       )}
 
-      {/* Tab 3: Pôle d'investissement */}
+      {/* Tab 3: Allègements */}
+      {activeTab === 'allegements' && (
+        <div className="space-y-3">
+          <div className="text-xs text-purple-300 font-semibold px-2">
+            Redonner du pouvoir d’achat : baisses de TVA, barème fiscal à 14 tranches et soutien TPE/PME
+          </div>
+          {ALLEGEMENTS_DATA.map((item, idx) => {
+            const isExpanded = expandedIndex === idx;
+            return (
+              <div
+                key={idx}
+                className="glass-panel rounded-2xl border border-amber-500/20 overflow-hidden shadow-lg transition-colors"
+              >
+                <button
+                  type="button"
+                  onClick={() => setExpandedIndex(isExpanded ? null : idx)}
+                  className="w-full p-4.5 flex items-center justify-between text-left hover:bg-purple-900/30 transition-colors"
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 shadow-sm" />
+                    <div>
+                      <h3 className="font-extrabold text-sm sm:text-base text-white">{item.title}</h3>
+                      <span className="text-xs font-black text-amber-300">{item.amount}</span>
+                    </div>
+                  </div>
+                  <IconChevronDown
+                    className={`w-4 h-4 text-purple-400 transition-transform ${isExpanded ? 'rotate-180 text-amber-300' : ''}`}
+                  />
+                </button>
+
+                {isExpanded && (
+                  <div className="px-5 pb-5 pt-2 border-t border-purple-900/50 bg-[#120324]/80 space-y-2">
+                    <p className="text-xs text-purple-200/90 font-medium">
+                      {item.description}
+                    </p>
+                    <ul className="space-y-2 mt-2">
+                      {item.points.map((pt, pIdx) => (
+                        <li key={pIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 leading-relaxed">
+                          <span className="text-amber-400 font-black mt-0.5">•</span>
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {onOpenSimulator && (
+            <button
+              type="button"
+              onClick={onOpenSimulator}
+              className="w-full mt-2 p-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 active:scale-[0.99] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all"
+              style={{ touchAction: 'manipulation' }}
+            >
+              <IconCalculator size={18} />
+              <span>Calculer vos économies d’impôts sur le simulateur LFI ➔</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Tab 4: Pôle d'investissement */}
       {activeTab === 'investissement' && (
         <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-purple-500/30 shadow-2xl space-y-5">
           <div className="flex items-center gap-4">
@@ -239,6 +408,22 @@ export const BudgetView = ({ budget, onOpenSimulator }: BudgetViewProps) => {
           </div>
         </div>
       )}
+
+      {/* Fiche Détaillée Pop-up Modal */}
+      <BudgetDetailModal
+        ficheKey={currentFicheModal || null}
+        onClose={handleCloseFiche}
+        budget={budget}
+        onOpenSimulator={onOpenSimulator}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          if (onOpenFicheModal) {
+            onOpenFicheModal(tab);
+          } else {
+            setInternalFicheModal(tab);
+          }
+        }}
+      />
     </div>
   );
 };
