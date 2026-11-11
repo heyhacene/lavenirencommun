@@ -61,84 +61,80 @@ export const BudgetView = ({
             <button
               type="button"
               onClick={() => handleOpenFiche('depenses')}
-              className="bg-[#18082f]/90 hover:bg-[#250d44] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-rose-500/40 hover:border-rose-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              className="budget-stat-pave budget-stat-pave-depenses group active:scale-95"
               style={{ touchAction: 'manipulation' }}
               title="Consulter la fiche détaillée des dépenses (+106,4 Md€)"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-rose-300 font-bold uppercase tracking-wider">Dépenses</span>
-                <span className="text-xs text-rose-400 group-hover:translate-x-0.5 transition-transform">→</span>
-              </div>
+              <span className="text-[11px] text-rose-300 font-bold uppercase tracking-wider block">
+                Dépenses
+              </span>
               <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.depensesAnnuelles}
               </span>
-              <div className="text-[10px] text-rose-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-rose-200">
+              <span className="text-[10px] text-rose-300/80 font-semibold mt-1 inline-flex items-center gap-1 group-hover:text-rose-200">
                 <span>Fiche détaillée</span>
-                <span className="text-[9px]">➔</span>
-              </div>
+                <span className="text-[9px] group-hover:translate-x-0.5 transition-transform">➔</span>
+              </span>
             </button>
 
             {/* Pavé 2: Recettes */}
             <button
               type="button"
               onClick={() => handleOpenFiche('recettes')}
-              className="bg-[#18082f]/90 hover:bg-[#122b27] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-emerald-500/40 hover:border-emerald-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              className="budget-stat-pave budget-stat-pave-recettes group active:scale-95"
               style={{ touchAction: 'manipulation' }}
               title="Consulter la fiche détaillée des recettes (+81,7 Md€)"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-emerald-300 font-bold uppercase tracking-wider">Recettes</span>
-                <span className="text-xs text-emerald-400 group-hover:translate-x-0.5 transition-transform">→</span>
-              </div>
+              <span className="text-[11px] text-emerald-300 font-bold uppercase tracking-wider block">
+                Recettes
+              </span>
               <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.recettesAnnuelles}
               </span>
-              <div className="text-[10px] text-emerald-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-emerald-200">
+              <span className="text-[10px] text-emerald-300/80 font-semibold mt-1 inline-flex items-center gap-1 group-hover:text-emerald-200">
                 <span>Fiche détaillée</span>
-                <span className="text-[9px]">➔</span>
-              </div>
+                <span className="text-[9px] group-hover:translate-x-0.5 transition-transform">➔</span>
+              </span>
             </button>
 
             {/* Pavé 3: Allègements */}
             <button
               type="button"
               onClick={() => handleOpenFiche('allegements')}
-              className="bg-[#18082f]/90 hover:bg-[#302111] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-amber-500/40 hover:border-amber-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              className="budget-stat-pave budget-stat-pave-allegements group active:scale-95"
               style={{ touchAction: 'manipulation' }}
               title="Consulter la fiche détaillée des allègements et baisses d'impôts (-24,7 Md€)"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-amber-300 font-bold uppercase tracking-wider">Allègements</span>
-                <span className="text-xs text-amber-400 group-hover:translate-x-0.5 transition-transform">→</span>
-              </div>
+              <span className="text-[11px] text-amber-300 font-bold uppercase tracking-wider block">
+                Allègements
+              </span>
               <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.baissesImpotsEtCouts}
               </span>
-              <div className="text-[10px] text-amber-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-amber-200">
+              <span className="text-[10px] text-amber-300/80 font-semibold mt-1 inline-flex items-center gap-1 group-hover:text-amber-200">
                 <span>Fiche détaillée</span>
-                <span className="text-[9px]">➔</span>
-              </div>
+                <span className="text-[9px] group-hover:translate-x-0.5 transition-transform">➔</span>
+              </span>
             </button>
 
             {/* Pavé 4: Pôle Investissement */}
             <button
               type="button"
               onClick={() => handleOpenFiche('investissement')}
-              className="bg-[#18082f]/90 hover:bg-[#0c263d] active:scale-95 transition-all backdrop-blur-md rounded-2xl p-3.5 border border-cyan-500/40 hover:border-cyan-400 text-left shadow-lg group cursor-pointer w-full relative overflow-hidden"
+              className="budget-stat-pave budget-stat-pave-investissement group active:scale-95"
               style={{ touchAction: 'manipulation' }}
               title="Consulter la fiche détaillée du Grand Pôle Public d'Investissement (100 Md€)"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-cyan-300 font-bold uppercase tracking-wider">Pôle Invest.</span>
-                <span className="text-xs text-cyan-400 group-hover:translate-x-0.5 transition-transform">→</span>
-              </div>
+              <span className="text-[11px] text-cyan-300 font-bold uppercase tracking-wider block">
+                Pôle Invest.
+              </span>
               <span className="text-lg sm:text-xl font-black text-white mt-1 block tracking-tight">
                 {budget.balanceTotal.polePublicInvestissement}
               </span>
-              <div className="text-[10px] text-cyan-300/80 font-semibold mt-1 flex items-center gap-1 group-hover:text-cyan-200">
+              <span className="text-[10px] text-cyan-300/80 font-semibold mt-1 inline-flex items-center gap-1 group-hover:text-cyan-200">
                 <span>Fiche détaillée</span>
-                <span className="text-[9px]">➔</span>
-              </div>
+                <span className="text-[9px] group-hover:translate-x-0.5 transition-transform">➔</span>
+              </span>
             </button>
           </div>
         </div>

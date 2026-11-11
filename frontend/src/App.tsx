@@ -43,7 +43,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.27';
+const APP_CURRENT_VERSION = 'v1.0.29';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
