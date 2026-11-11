@@ -521,8 +521,8 @@ export default function App() {
                     onClick={() => {
                       setSelectedPartie(null);
                       setSelectedProfile('tous');
-            const el = document.getElementById("reader-partie-" + pNum);
-
+                      const el = document.getElementById('fiches-grid-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className="stitch-stat-box cursor-pointer group hover:scale-[1.02] active:scale-95 transition-all relative overflow-hidden"
                     title="Voir les 111 fiches thématiques"
