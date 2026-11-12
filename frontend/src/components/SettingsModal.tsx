@@ -41,7 +41,7 @@ export const SettingsModal = ({
   onOpenSimulator,
   onOpenEvents,
   onOpenAdmin,
-  currentVersion = 'v1.0.35',
+  currentVersion = 'v1.0.36',
   fontSizePreference = 'normal',
   onFontSizeChange
 }: SettingsModalProps) => {

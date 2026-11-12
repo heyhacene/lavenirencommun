@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { EventsData, AppEvent, BroadcastBanner, EventCategory } from '../types/events';
 import { verifyAdminPasscode, saveLocalEventsData, setCustomAdminPasscode } from '../services/events';
-import { IconClose, IconCheck, IconTrash, IconEdit, IconPlus, IconCopy } from './Icons';
+import { IconClose, IconCheck, IconTrash, IconEdit, IconPlus, IconCopy, IconEye, IconEyeOff } from './Icons';
 
 interface AdminEventsModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
   onUpdateEventsData
 }) => {
   const [passcode, setPasscode] = useState('');
+  const [showPasscode, setShowPasscode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -43,6 +44,7 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
   // Form states for changing password
   const [newPasscode, setNewPasscode] = useState('');
   const [confirmPasscode, setConfirmPasscode] = useState('');
+  const [showNewPasscode, setShowNewPasscode] = useState(false);
   const [passcodeChangeMessage, setPasscodeChangeMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -228,7 +230,7 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
         <div className="overflow-y-auto px-5 py-5 space-y-6 flex-1">
           {/* ÉCRAN DE VERROUILLAGE PAR CODE SECRET */}
           {!isAuthenticated ? (
-            <form onSubmit={handleLogin} className="max-w-md mx-auto text-center py-8 space-y-4">
+            <form onSubmit={handleLogin} className="max-w-md mx-auto text-center py-8 space-y-5">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl shadow-inner">
                 🔑
               </div>
@@ -236,18 +238,41 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
                 Accès réservé aux organisateurs
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Veuillez renseigner le code secret administrateur pour gérer les annonces et le calendrier.
+                Veuillez renseigner le mot de passe secret pour gérer les annonces et le calendrier.
               </p>
 
-              <div className="space-y-2">
-                <input
-                  type="password"
-                  value={passcode}
-                  onChange={e => setPasscode(e.target.value)}
-                  placeholder="Mot de passe secret"
-                  className="w-full text-center px-4 py-3 rounded-xl bg-purple-950/60 border border-purple-700/60 text-white placeholder-purple-400/50 text-sm font-bold focus:border-amber-400 outline-none tracking-widest"
-                  autoFocus
-                />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showPasscode ? 'text' : 'password'}
+                      value={passcode}
+                      onChange={e => setPasscode(e.target.value)}
+                      placeholder="Mot de passe secret"
+                      className="w-full pl-4 pr-11 py-3 rounded-xl bg-purple-950/70 border border-purple-700/70 text-white placeholder-purple-400/50 text-sm font-bold focus:border-amber-400 outline-none tracking-wide"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasscode(!showPasscode)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-purple-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                      title={showPasscode ? "Masquer le mot de passe" : "Afficher le mot de passe en clair"}
+                    >
+                      {showPasscode ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer"
+                    style={{ touchAction: 'manipulation' }}
+                    title="Valider le mot de passe"
+                  >
+                    <span>OK</span>
+                    <IconCheck size={16} />
+                  </button>
+                </div>
+
                 {authError && (
                   <p className="text-xs text-rose-400 font-bold">{authError}</p>
                 )}
@@ -255,10 +280,11 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
                 style={{ touchAction: 'manipulation' }}
               >
-                Déverrouiller l'espace ➔
+                <span>Déverrouiller l'espace</span>
+                <IconCheck size={16} />
               </button>
             </form>
           ) : (
@@ -555,20 +581,41 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
 
                 <form onSubmit={handleChangePasscode} className="space-y-2.5 pt-1">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <input
-                      type="password"
-                      value={newPasscode}
-                      onChange={e => setNewPasscode(e.target.value)}
-                      placeholder="Nouveau mot de passe secret"
-                      className="w-full px-3 py-2 rounded-xl bg-[#120126] border border-purple-800 text-white text-xs font-semibold focus:border-amber-400 outline-none"
-                    />
-                    <input
-                      type="password"
-                      value={confirmPasscode}
-                      onChange={e => setConfirmPasscode(e.target.value)}
-                      placeholder="Confirmer le mot de passe"
-                      className="w-full px-3 py-2 rounded-xl bg-[#120126] border border-purple-800 text-white text-xs font-semibold focus:border-amber-400 outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showNewPasscode ? 'text' : 'password'}
+                        value={newPasscode}
+                        onChange={e => setNewPasscode(e.target.value)}
+                        placeholder="Nouveau mot de passe"
+                        className="w-full pl-3 pr-10 py-2 rounded-xl bg-[#120126] border border-purple-800 text-white text-xs font-semibold focus:border-amber-400 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPasscode(!showNewPasscode)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-purple-300 hover:text-white rounded transition-colors cursor-pointer"
+                        title={showNewPasscode ? "Masquer" : "Afficher en clair"}
+                      >
+                        {showNewPasscode ? <IconEyeOff size={15} /> : <IconEye size={15} />}
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        type={showNewPasscode ? 'text' : 'password'}
+                        value={confirmPasscode}
+                        onChange={e => setConfirmPasscode(e.target.value)}
+                        placeholder="Confirmer le mot de passe"
+                        className="w-full pl-3 pr-10 py-2 rounded-xl bg-[#120126] border border-purple-800 text-white text-xs font-semibold focus:border-amber-400 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPasscode(!showNewPasscode)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-purple-300 hover:text-white rounded transition-colors cursor-pointer"
+                        title={showNewPasscode ? "Masquer" : "Afficher en clair"}
+                      >
+                        {showNewPasscode ? <IconEyeOff size={15} /> : <IconEye size={15} />}
+                      </button>
+                    </div>
                   </div>
 
                   {passcodeChangeMessage && (
