@@ -55,7 +55,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.32';
+const APP_CURRENT_VERSION = 'v1.0.33';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
@@ -432,37 +432,48 @@ export default function App() {
       <div className="fixed bottom-20 -left-20 w-[400px] h-[400px] bg-red-600/10 rounded-full blur-[140px] pointer-events-none z-0" />
 
       {/* Top Header */}
-      <header className="stitch-header flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="stitch-header flex items-center justify-between gap-1.5 sm:gap-3">
+        {/* Left: Enlarged LFI Logo + Interactive Title */}
+        <div
+          onClick={() => {
+            setSelectedPartie(null);
+            setSelectedProfile('tous');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 cursor-pointer select-none"
+          title="Retour au sommet de la page"
+        >
+          {/* Enlarged Phi LFI Logo */}
           <div className="relative group flex-shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2e0059] via-[#150033] to-[#4c0297] border border-purple-400/40 flex items-center justify-center shadow-md p-1.5">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#3d0075] via-[#1a003f] to-[#5a05b3] border border-purple-400/50 flex items-center justify-center shadow-[0_0_16px_rgba(168,85,247,0.4)] p-1 hover:scale-105 transition-all">
               <img src="./logo-fi.png" alt="Phi LFI" className="w-full h-full object-contain drop-shadow" />
             </div>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-black tracking-wider text-white uppercase leading-none">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs sm:text-sm font-black tracking-wider text-white uppercase leading-none truncate">
                 L'AVENIR EN COMMUN
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-600/40 text-purple-200 border border-purple-400/30">
+              <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-600/40 text-purple-200 border border-purple-400/30 flex-shrink-0">
                 2027
               </span>
             </div>
-            <span className="text-[11px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-amber-300">
-              Jean-Luc Mélenchon • 111 Fiches officielles
+            <span className="text-[10px] sm:text-[11px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-amber-300 truncate block mt-0.5">
+              Jean-Luc Mélenchon • 111 Fiches
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Proposition au hasard header button with launch tooltip */}
-          <div className="relative">
+        {/* Right: Action Buttons (Guaranteed visibility with flex-shrink-0) */}
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          {/* 1. Proposition au hasard */}
+          <div className="relative flex-shrink-0">
             <button
               onClick={() => {
                 setShowRandomTooltip(false);
                 handleOpenRandomFiche();
               }}
-              className="w-10 h-10 rounded-xl bg-purple-950/60 border border-amber-500/40 text-amber-300 hover:text-white hover:bg-amber-600/30 transition-all flex items-center justify-center active:scale-95 text-base relative"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-950/60 border border-amber-500/40 text-amber-300 hover:text-white hover:bg-amber-600/30 transition-all flex items-center justify-center active:scale-95 text-sm sm:text-base relative flex-shrink-0"
               title="Une proposition au hasard"
             >
               🎲
@@ -475,67 +486,64 @@ export default function App() {
                   setShowRandomTooltip(false);
                   handleOpenRandomFiche();
                 }}
-                className="absolute top-full mt-2.5 right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 z-50 animate-bounce cursor-pointer select-none"
+                className="absolute top-full mt-2.5 right-0 z-50 animate-bounce cursor-pointer select-none"
                 style={{ animationDuration: '2s' }}
               >
-                {/* Pointer arrow */}
-                <div className="absolute -top-1 right-3.5 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-2.5 h-2.5 bg-amber-500 rotate-45 rounded-[2px]" />
-                
-                {/* Bubble text */}
-                <div className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 text-slate-950 font-black text-[11px] shadow-[0_6px_20px_rgba(245,158,11,0.5)] border border-amber-200/50 whitespace-nowrap">
+                <div className="absolute -top-1 right-2.5 w-2.5 h-2.5 bg-amber-500 rotate-45 rounded-[2px]" />
+                <div className="relative flex items-center gap-1 px-2 py-1 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 text-slate-950 font-black text-[10px] shadow-[0_6px_20px_rgba(245,158,11,0.5)] border border-amber-200/50 whitespace-nowrap">
                   <span>🎲</span>
-                  <span>Une mesure au hasard</span>
+                  <span>Au hasard</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Search Button */}
+          {/* 2. Search Button */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95 flex-shrink-0"
             title="Rechercher une mesure"
           >
-            <IconSearch size={18} />
+            <IconSearch size={16} />
           </button>
 
-          {/* Alerts Dedicated Button */}
-          <button
-            onClick={() => setAlertsManagerOpen(true)}
-            className="relative w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
-            title="Gestion des alertes"
-          >
-            <IconBell size={18} />
-            {activeAlertsCount > 0 && (
-              <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-[#0B0118]" />
-              </span>
-            )}
-          </button>
-
-          {/* Calendar & Events Dedicated Button */}
+          {/* 3. Calendar & Events Dedicated Button */}
           <button
             onClick={() => setEventsModalOpen(true)}
-            className="relative w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
+            className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95 flex-shrink-0"
             title="Agenda des événements & Réunions publiques"
           >
-            <IconCalendar size={18} />
+            <IconCalendar size={16} />
             {eventsData?.banner?.enabled && (
-              <span className="absolute top-2 right-2 flex h-2 w-2">
+              <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 ring-2 ring-[#0B0118]" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 ring-1 ring-[#0B0118]" />
               </span>
             )}
           </button>
 
-          {/* Settings Button */}
+          {/* 4. Alerts Dedicated Button */}
+          <button
+            onClick={() => setAlertsManagerOpen(true)}
+            className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95 flex-shrink-0"
+            title="Gestion des alertes"
+          >
+            <IconBell size={16} />
+            {activeAlertsCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 ring-1 ring-[#0B0118]" />
+              </span>
+            )}
+          </button>
+
+          {/* 5. Settings Button (Toujours visible avec badge d'accentuation) */}
           <button
             onClick={() => setSettingsOpen(true)}
-            className="w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-purple-800/90 to-indigo-800/90 border border-purple-400/50 text-white hover:border-purple-300 hover:bg-purple-700 shadow-[0_0_10px_rgba(168,85,247,0.35)] transition-all flex items-center justify-center active:scale-95 flex-shrink-0"
             title="Paramètres de l'application"
           >
-            <IconSettings size={18} />
+            <IconSettings size={16} />
           </button>
         </div>
       </header>

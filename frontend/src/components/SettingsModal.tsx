@@ -39,7 +39,7 @@ export const SettingsModal = ({
   onOpenIosInstall,
   onOpenSimulator,
   onOpenEvents,
-  currentVersion = 'v1.0.32',
+  currentVersion = 'v1.0.33',
   fontSizePreference = 'normal',
   onFontSizeChange
 }: SettingsModalProps) => {
