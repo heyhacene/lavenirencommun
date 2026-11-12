@@ -1,0 +1,52 @@
+{
+  "banner": {
+    "enabled": true,
+    "type": "event",
+    "message": "📅 Prochaine réunion publique : Pour la 6ᵉ République et la bifurcation écologique !",
+    "linkText": "Voir l'agenda",
+    "eventId": "event-1"
+  },
+  "events": [
+    {
+      "id": "event-1",
+      "title": "Grande réunion publique : Pour la 6ᵉ République et la bifurcation écologique",
+      "date": "2026-11-21T18:30:00",
+      "category": "reunion_publique",
+      "location": "Maison du Peuple, Lille (et en direct sur YouTube)",
+      "description": "Présentation des 111 fiches thématiques et du chiffrage budgétaire avec nos députés et orateurs nationaux.",
+      "speakers": [
+        "Députés LFI",
+        "Militants syndicaux et associatifs"
+      ],
+      "link": "https://actionpopulaire.fr",
+      "isHighlighted": true
+    },
+    {
+      "id": "event-2",
+      "title": "Tractage & Caravane populaire : Pouvoir d'achat & blocage des prix",
+      "date": "2026-11-28T10:00:00",
+      "category": "action_militante",
+      "location": "Place du Marché, Marseille",
+      "description": "Distribution du programme L'Avenir en commun et simulation des 14 tranches d'impôt avec les habitants.",
+      "speakers": [
+        "Groupe d'action local"
+      ],
+      "link": "https://actionpopulaire.fr",
+      "isHighlighted": false
+    },
+    {
+      "id": "event-3",
+      "title": "Grand Meeting National : L'Avenir en commun 2027",
+      "date": "2026-12-12T14:30:00",
+      "category": "meeting",
+      "location": "Paris Expo & En direct sur Twitch / YouTube",
+      "description": "Grand rassemblement populaire pour porter le projet de transformation sociale et d'écologie populaire.",
+      "speakers": [
+        "Jean-Luc Mélenchon",
+        "Invités nationaux et internationaux"
+      ],
+      "link": "https://actionpopulaire.fr",
+      "isHighlighted": true
+    }
+  ]
+}
