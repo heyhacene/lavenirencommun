@@ -19,7 +19,23 @@ export const loadEventsData = async (): Promise<EventsData> => {
     // Poursuivre vers le fetch distant
   }
 
-  // 2. Récupérer le fichier events.json officiel avec anti-cache pour être toujours à jour
+  // 2. Récupérer le fichier events.json officiel en direct depuis GitHub (Live Feed) avec anti-cache
+  try {
+    const timestamp = Date.now();
+    // Priorité au flux distant direct pour que toute annonce soit reçue par tous les utilisateurs de l'APK
+    const liveUrl = `https://raw.githubusercontent.com/heyhacene/lavenirencommun/main/frontend/public/data/events.json?v=${timestamp}`;
+    const res = await fetch(liveUrl, {
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (res.ok) {
+      const data: EventsData = await res.json();
+      return data;
+    }
+  } catch (err) {
+    console.warn('Impossible de charger le flux en direct:', err);
+  }
+
+  // 3. Repli local bundled (mode hors-ligne ou réseau coupé)
   try {
     const timestamp = Date.now();
     const res = await fetch(`./data/events.json?v=${timestamp}`, {
@@ -30,7 +46,7 @@ export const loadEventsData = async (): Promise<EventsData> => {
       return data;
     }
   } catch (err) {
-    console.warn('Impossible de charger les événements distants:', err);
+    console.warn('Impossible de charger les événements locaux:', err);
   }
 
   // 3. Repli statique si réseau coupé

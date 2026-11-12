@@ -40,6 +40,11 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [copiedJson, setCopiedJson] = useState(false);
 
+  // Form states for changing password
+  const [newPasscode, setNewPasscode] = useState('');
+  const [confirmPasscode, setConfirmPasscode] = useState('');
+  const [passcodeChangeMessage, setPasscodeChangeMessage] = useState<string | null>(null);
+
   if (!isOpen) return null;
 
   const handleLogin = (e: React.FormEvent) => {
@@ -48,8 +53,25 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
       setIsAuthenticated(true);
       setAuthError(null);
     } else {
-      setAuthError('Code administrateur incorrect.');
+      setAuthError('Mot de passe administrateur incorrect.');
     }
+  };
+
+  const handleChangePasscode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPasscode.trim()) {
+      setPasscodeChangeMessage('Veuillez saisir un mot de passe.');
+      return;
+    }
+    if (newPasscode !== confirmPasscode) {
+      setPasscodeChangeMessage('Les deux mots de passe ne correspondent pas.');
+      return;
+    }
+    setCustomAdminPasscode(newPasscode.trim());
+    setPasscodeChangeMessage('✅ Mot de passe mis à jour avec succès !');
+    setNewPasscode('');
+    setConfirmPasscode('');
+    setTimeout(() => setPasscodeChangeMessage(null), 4000);
   };
 
   const handleSaveBanner = () => {
@@ -222,13 +244,10 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
                   type="password"
                   value={passcode}
                   onChange={e => setPasscode(e.target.value)}
-                  placeholder="Code secret (2027LFI)"
-                  className="w-full text-center px-4 py-3 rounded-xl bg-purple-950/60 border border-purple-700/60 text-white placeholder-purple-400/50 text-sm font-bold focus:border-amber-400 outline-none"
+                  placeholder="Mot de passe secret"
+                  className="w-full text-center px-4 py-3 rounded-xl bg-purple-950/60 border border-purple-700/60 text-white placeholder-purple-400/50 text-sm font-bold focus:border-amber-400 outline-none tracking-widest"
                   autoFocus
                 />
-                <p className="text-[11px] text-amber-300/80 font-medium">
-                  💡 Code secret par défaut : <strong className="text-white font-bold tracking-wider bg-purple-900/60 px-2 py-0.5 rounded border border-purple-500/40">2027LFI</strong> (modifiable une fois connecté)
-                </p>
                 {authError && (
                   <p className="text-xs text-rose-400 font-bold">{authError}</p>
                 )}
@@ -520,6 +539,52 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
                     <span>{copiedJson ? 'Copié !' : 'Copier JSON'}</span>
                   </button>
                 </div>
+              </div>
+
+              {/* 4. SÉCURITÉ & MODIFICATION DU MOT DE PASSE ORGANISATEUR */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#1a0433]/80 border border-purple-600/30 space-y-3 shadow-md">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🔑</span>
+                  <h3 className="font-black text-sm text-white uppercase tracking-wider">
+                    Modifier votre mot de passe secret
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Définissez votre propre mot de passe personnalisé. Vous seul et les camarades à qui vous le confiez pourrez publier.
+                </p>
+
+                <form onSubmit={handleChangePasscode} className="space-y-2.5 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <input
+                      type="password"
+                      value={newPasscode}
+                      onChange={e => setNewPasscode(e.target.value)}
+                      placeholder="Nouveau mot de passe secret"
+                      className="w-full px-3 py-2 rounded-xl bg-[#120126] border border-purple-800 text-white text-xs font-semibold focus:border-amber-400 outline-none"
+                    />
+                    <input
+                      type="password"
+                      value={confirmPasscode}
+                      onChange={e => setConfirmPasscode(e.target.value)}
+                      placeholder="Confirmer le mot de passe"
+                      className="w-full px-3 py-2 rounded-xl bg-[#120126] border border-purple-800 text-white text-xs font-semibold focus:border-amber-400 outline-none"
+                    />
+                  </div>
+
+                  {passcodeChangeMessage && (
+                    <p className={`text-xs font-bold ${passcodeChangeMessage.startsWith('✅') ? 'text-emerald-300' : 'text-rose-400'}`}>
+                      {passcodeChangeMessage}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition-all active:scale-95"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    Enregistrer le nouveau mot de passe
+                  </button>
+                </form>
               </div>
             </div>
           )}

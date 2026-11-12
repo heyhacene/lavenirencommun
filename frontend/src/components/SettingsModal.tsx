@@ -41,7 +41,7 @@ export const SettingsModal = ({
   onOpenSimulator,
   onOpenEvents,
   onOpenAdmin,
-  currentVersion = 'v1.0.34',
+  currentVersion = 'v1.0.35',
   fontSizePreference = 'normal',
   onFontSizeChange
 }: SettingsModalProps) => {
@@ -229,7 +229,7 @@ export const SettingsModal = ({
                     <div className="font-extrabold text-sm text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
                       <span>Espace Organisateur</span>
                       <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                        Code secret
+                        Accès restreint
                       </span>
                     </div>
                     <div className="text-xs text-amber-200/80 mt-0.5">

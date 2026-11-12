@@ -167,7 +167,7 @@ export const EventsModal: React.FC<EventsModalProps> = ({
             onClick={onOpenAdmin}
             className="flex-shrink-0 ml-2 font-black text-amber-300 hover:text-white underline underline-offset-2 flex items-center gap-1"
           >
-            <span>Accès Organisateur (Code : 2027LFI)</span>
+            <span>Connexion organisateur</span>
             <span>➔</span>
           </button>
         </div>
