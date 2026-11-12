@@ -23,6 +23,7 @@ interface SettingsModalProps {
   onOpenIosInstall?: () => void;
   onOpenSimulator?: () => void;
   onOpenEvents?: () => void;
+  onOpenAdmin?: () => void;
   currentVersion?: string;
   fontSizePreference?: FontSizePreference;
   onFontSizeChange?: (pref: FontSizePreference) => void;
@@ -39,7 +40,8 @@ export const SettingsModal = ({
   onOpenIosInstall,
   onOpenSimulator,
   onOpenEvents,
-  currentVersion = 'v1.0.33',
+  onOpenAdmin,
+  currentVersion = 'v1.0.34',
   fontSizePreference = 'normal',
   onFontSizeChange
 }: SettingsModalProps) => {
@@ -206,6 +208,37 @@ export const SettingsModal = ({
                 </div>
 
                 <div className="text-purple-400 group-hover:text-amber-300 transition-colors">
+                  <IconChevronRight size={18} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Card: Espace Organisateur & Annonces */}
+          {onOpenAdmin && (
+            <div
+              onClick={onOpenAdmin}
+              className="p-4 rounded-2xl bg-gradient-to-r from-[#20053b] via-[#1a0430] to-[#120025] border border-amber-500/40 hover:border-amber-400/80 transition-all cursor-pointer group shadow-lg active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-tr from-amber-500 to-rose-600 rounded-xl text-white shadow-md flex items-center justify-center">
+                    <span className="text-xl leading-none">🔒</span>
+                  </div>
+                  <div>
+                    <div className="font-extrabold text-sm text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
+                      <span>Espace Organisateur</span>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                        Code secret
+                      </span>
+                    </div>
+                    <div className="text-xs text-amber-200/80 mt-0.5">
+                      Gérer le bandeau d'annonces en haut d'écran et l'agenda des actions
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-amber-400 group-hover:text-amber-300 group-hover:translate-x-0.5 transition-transform">
                   <IconChevronRight size={18} />
                 </div>
               </div>

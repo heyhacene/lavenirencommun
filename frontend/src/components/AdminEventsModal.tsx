@@ -222,10 +222,13 @@ export const AdminEventsModal: React.FC<AdminEventsModalProps> = ({
                   type="password"
                   value={passcode}
                   onChange={e => setPasscode(e.target.value)}
-                  placeholder="Code secret (ex: 2027LFI)"
+                  placeholder="Code secret (2027LFI)"
                   className="w-full text-center px-4 py-3 rounded-xl bg-purple-950/60 border border-purple-700/60 text-white placeholder-purple-400/50 text-sm font-bold focus:border-amber-400 outline-none"
                   autoFocus
                 />
+                <p className="text-[11px] text-amber-300/80 font-medium">
+                  💡 Code secret par défaut : <strong className="text-white font-bold tracking-wider bg-purple-900/60 px-2 py-0.5 rounded border border-purple-500/40">2027LFI</strong> (modifiable une fois connecté)
+                </p>
                 {authError && (
                   <p className="text-xs text-rose-400 font-bold">{authError}</p>
                 )}

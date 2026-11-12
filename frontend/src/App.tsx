@@ -55,7 +55,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.33';
+const APP_CURRENT_VERSION = 'v1.0.34';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
@@ -897,6 +897,10 @@ export default function App() {
         onOpenEvents={() => {
           setSettingsOpen(false);
           setEventsModalOpen(true);
+        }}
+        onOpenAdmin={() => {
+          setSettingsOpen(false);
+          setAdminEventsModalOpen(true);
         }}
         currentVersion={APP_CURRENT_VERSION}
         fontSizePreference={fontSizePreference}

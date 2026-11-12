@@ -131,14 +131,44 @@ export const EventsModal: React.FC<EventsModalProps> = ({
             </div>
           </div>
 
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/25 to-rose-500/25 hover:from-amber-500/40 hover:to-rose-500/40 border border-amber-400/50 text-amber-300 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              style={{ touchAction: 'manipulation' }}
+              title="Accès organisateur pour publier sur le bandeau d'accueil ou modifier le calendrier"
+            >
+              <span>🔒</span>
+              <span className="hidden sm:inline">Espace Organisateur</span>
+              <span className="sm:hidden">Organisateur</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-200 hover:text-white flex items-center justify-center transition-all active:scale-90"
+              style={{ touchAction: 'manipulation' }}
+              title="Fermer l'agenda"
+            >
+              <IconClose size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Organizer Prompt Banner */}
+        <div className="px-5 py-2.5 bg-gradient-to-r from-amber-950/50 via-purple-950/40 to-[#120126] border-b border-purple-900/40 flex items-center justify-between text-xs flex-shrink-0">
+          <div className="flex items-center gap-2 text-amber-200 font-medium truncate">
+            <span>📢</span>
+            <span className="truncate">Vous organisez une réunion publique ou un événement ?</span>
+          </div>
           <button
             type="button"
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-200 hover:text-white flex items-center justify-center transition-all active:scale-90"
-            style={{ touchAction: 'manipulation' }}
-            title="Fermer l'agenda"
+            onClick={onOpenAdmin}
+            className="flex-shrink-0 ml-2 font-black text-amber-300 hover:text-white underline underline-offset-2 flex items-center gap-1"
           >
-            <IconClose size={20} />
+            <span>Accès Organisateur (Code : 2027LFI)</span>
+            <span>➔</span>
           </button>
         </div>
 
