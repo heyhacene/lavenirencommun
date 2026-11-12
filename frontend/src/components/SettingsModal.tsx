@@ -1,4 +1,5 @@
 import type { MultiAlertConfig } from '../types/programme';
+import { type FontSizePreference } from '../services/accessibility';
 import {
   IconClose,
   IconBell,
@@ -7,7 +8,8 @@ import {
   IconRefresh,
   IconBookOpen,
   IconShare,
-  IconMegaphone
+  IconMegaphone,
+  IconCalendar
 } from './Icons';
 
 interface SettingsModalProps {
@@ -20,7 +22,10 @@ interface SettingsModalProps {
   onOpenSocial: () => void;
   onOpenIosInstall?: () => void;
   onOpenSimulator?: () => void;
+  onOpenEvents?: () => void;
   currentVersion?: string;
+  fontSizePreference?: FontSizePreference;
+  onFontSizeChange?: (pref: FontSizePreference) => void;
 }
 
 export const SettingsModal = ({
@@ -33,7 +38,10 @@ export const SettingsModal = ({
   onOpenSocial,
   onOpenIosInstall,
   onOpenSimulator,
-  currentVersion = 'v1.0.29'
+  onOpenEvents,
+  currentVersion = 'v1.0.30',
+  fontSizePreference = 'normal',
+  onFontSizeChange
 }: SettingsModalProps) => {
   if (!isOpen) return null;
 
@@ -108,6 +116,101 @@ export const SettingsModal = ({
               </div>
             </div>
           </div>
+
+          {/* Card: Accessibilité & Taille de Police */}
+          <div className="p-4 rounded-2xl bg-[#1b0833] border border-purple-500/30 shadow-lg space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-xl text-white shadow-md flex items-center justify-center w-11 h-11 flex-shrink-0">
+                  <span className="text-base font-black">Aa</span>
+                </div>
+                <div>
+                  <div className="font-extrabold text-sm text-white flex items-center gap-2">
+                    <span>Accessibilité &amp; Taille du texte</span>
+                  </div>
+                  <div className="text-xs text-purple-300/80 mt-0.5">
+                    Ajustez la taille des caractères pour un meilleur confort de lecture
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 buttons: Normal / Grand / Très Grand */}
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => onFontSizeChange?.('normal')}
+                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                  fontSizePreference === 'normal'
+                    ? 'bg-purple-600 text-white border-purple-400 shadow-md ring-1 ring-purple-400/60'
+                    : 'bg-[#120326] text-purple-300 border-purple-900/60 hover:border-purple-600 hover:text-white'
+                }`}
+                style={{ touchAction: 'manipulation' }}
+              >
+                <span className="block text-xs font-semibold">Normal</span>
+                <span className="block text-[10px] text-purple-300 opacity-80">100%</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onFontSizeChange?.('large')}
+                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                  fontSizePreference === 'large'
+                    ? 'bg-purple-600 text-white border-purple-400 shadow-md ring-1 ring-purple-400/60'
+                    : 'bg-[#120326] text-purple-300 border-purple-900/60 hover:border-purple-600 hover:text-white'
+                }`}
+                style={{ touchAction: 'manipulation' }}
+              >
+                <span className="block text-sm font-semibold">Grand</span>
+                <span className="block text-[10px] text-purple-300 opacity-80">+15%</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onFontSizeChange?.('xlarge')}
+                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all border text-center ${
+                  fontSizePreference === 'xlarge'
+                    ? 'bg-purple-600 text-white border-purple-400 shadow-md ring-1 ring-purple-400/60'
+                    : 'bg-[#120326] text-purple-300 border-purple-900/60 hover:border-purple-600 hover:text-white'
+                }`}
+                style={{ touchAction: 'manipulation' }}
+              >
+                <span className="block text-base font-semibold">Très Grand</span>
+                <span className="block text-[10px] text-purple-300 opacity-80">+30%</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Card: Agenda des événements & Réunions */}
+          {onOpenEvents && (
+            <div
+              onClick={onOpenEvents}
+              className="p-4 rounded-2xl bg-[#1b0833] border border-purple-500/30 hover:border-amber-400/60 transition-all cursor-pointer group shadow-lg active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-tr from-amber-500 to-purple-600 rounded-xl text-white shadow-md">
+                    <IconCalendar size={20} />
+                  </div>
+                  <div>
+                    <div className="font-extrabold text-sm text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
+                      <span>Agenda &amp; Réunions publiques</span>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                        Calendrier
+                      </span>
+                    </div>
+                    <div className="text-xs text-purple-300/80 mt-0.5">
+                      Meetings nationaux, réunions citoyennes, tractages et calendrier
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-purple-400 group-hover:text-amber-300 transition-colors">
+                  <IconChevronRight size={18} />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Card: Simulateur d'impôts & succession */}
           {onOpenSimulator && (

@@ -30,6 +30,16 @@ import { type BudgetFicheKey } from './components/BudgetDetailModal';
 import { PlansView } from './components/PlansView';
 import { TaxSimulatorView } from './components/TaxSimulatorView';
 import { PartiesModal } from './components/PartiesModal';
+import { InfoBanner } from './components/InfoBanner';
+import { EventsModal } from './components/EventsModal';
+import { AdminEventsModal } from './components/AdminEventsModal';
+import {
+  loadFontSizePreference,
+  saveFontSizePreference,
+  applyFontSize,
+  type FontSizePreference
+} from './services/accessibility';
+import { loadEventsData, type EventsData } from './services/events';
 import {
   IconSearch,
   IconBell,
@@ -39,11 +49,12 @@ import {
   IconPlans,
   IconBookOpen,
   IconCalculator,
+  IconCalendar,
   getProfileColor,
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.29';
+const APP_CURRENT_VERSION = 'v1.0.30';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
@@ -73,7 +84,47 @@ export default function App() {
   const [showRandomTooltip, setShowRandomTooltip] = useState(false);
   const [inAppToastSection, setInAppToastSection] = useState<Section | null>(null);
   const [multiAlertConfig, setMultiAlertConfig] = useState<MultiAlertConfig>(loadMultiAlertConfig());
+  const [fontSizePreference, setFontSizePreference] = useState<FontSizePreference>(loadFontSizePreference());
+  const [eventsData, setEventsData] = useState<EventsData | null>(null);
+  const [eventsModalOpen, setEventsModalOpen] = useState(false);
+  const [adminEventsModalOpen, setAdminEventsModalOpen] = useState(false);
   const dataRef = useRef<ProgrammeData | null>(null);
+
+  // Apply font accessibility scale preference immediately
+  useEffect(() => {
+    applyFontSize(fontSizePreference);
+  }, [fontSizePreference]);
+
+  // Load events & broadcast banner data
+  useEffect(() => {
+    loadEventsData().then(data => {
+      setEventsData(data);
+    });
+  }, []);
+
+  // Check for updates automatically on app launch and show popup if newer release exists
+  useEffect(() => {
+    const checkUpdateStartup = async () => {
+      try {
+        const sessionChecked = sessionStorage.getItem('lfi_update_popup_checked');
+        if (sessionChecked) return;
+        sessionStorage.setItem('lfi_update_popup_checked', 'true');
+
+        const res = await fetch('https://api.github.com/repos/heyhacene/lavenirencommun/releases/latest');
+        if (res.ok) {
+          const rel = await res.json();
+          const lastNotified = localStorage.getItem('lfi_last_notified_release');
+          if (rel.tag_name && rel.tag_name !== APP_CURRENT_VERSION && rel.tag_name !== lastNotified) {
+            localStorage.setItem('lfi_last_notified_release', rel.tag_name);
+            setUpdateModalOpen(true);
+          }
+        }
+      } catch (e) {
+        // Mode hors-ligne ou erreur réseau silencieuse
+      }
+    };
+    checkUpdateStartup();
+  }, []);
 
   // Helper to open a section by ID, globalIndex or title
   const openSectionFromTarget = (
@@ -246,7 +297,9 @@ export default function App() {
       socialModalOpen ||
       iosInstallModalOpen ||
       partiesModalOpen ||
-      budgetFicheModal
+      budgetFicheModal ||
+      eventsModalOpen ||
+      adminEventsModalOpen
     );
 
     if (isAnyModalOpen) {
@@ -254,6 +307,8 @@ export default function App() {
     }
 
     const handlePopState = () => {
+      setAdminEventsModalOpen(false);
+      setEventsModalOpen(false);
       setSelectedSectionForModal(null);
       setPartiesModalOpen(false);
       setBudgetFicheModal(null);
@@ -268,7 +323,7 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, budgetFicheModal]);
+  }, [selectedSectionForModal, searchModalOpen, alertsManagerOpen, settingsOpen, updateModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, budgetFicheModal, eventsModalOpen, adminEventsModalOpen]);
 
   // Native Capacitor back button listener
   useEffect(() => {
@@ -278,7 +333,11 @@ export default function App() {
       try {
         const { App: CapApp } = await import('@capacitor/app');
         const handle = await CapApp.addListener('backButton', () => {
-          if (budgetFicheModal) {
+          if (adminEventsModalOpen) {
+            setAdminEventsModalOpen(false);
+          } else if (eventsModalOpen) {
+            setEventsModalOpen(false);
+          } else if (budgetFicheModal) {
             setBudgetFicheModal(null);
           } else if (selectedSectionForModal) {
             setSelectedSectionForModal(null);
@@ -315,7 +374,7 @@ export default function App() {
     return () => {
       if (removeListener) removeListener();
     };
-  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, budgetFicheModal, activeTab]);
+  }, [selectedSectionForModal, alertsManagerOpen, updateModalOpen, settingsOpen, searchModalOpen, shareModalOpen, socialModalOpen, iosInstallModalOpen, partiesModalOpen, budgetFicheModal, eventsModalOpen, adminEventsModalOpen, activeTab]);
 
   // Filtered fiches for the main card list (by profile and/or by party)
   const filteredSections = useMemo(() => {
@@ -454,6 +513,21 @@ export default function App() {
             )}
           </button>
 
+          {/* Calendar & Events Dedicated Button */}
+          <button
+            onClick={() => setEventsModalOpen(true)}
+            className="relative w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-900/60 transition-all flex items-center justify-center active:scale-95"
+            title="Agenda des événements & Réunions publiques"
+          >
+            <IconCalendar size={18} />
+            {eventsData?.banner?.enabled && (
+              <span className="absolute top-2 right-2 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 ring-2 ring-[#0B0118]" />
+              </span>
+            )}
+          </button>
+
           {/* Settings Button */}
           <button
             onClick={() => setSettingsOpen(true)}
@@ -464,6 +538,12 @@ export default function App() {
           </button>
         </div>
       </header>
+
+      {/* Top Broadcast Information Banner (Public meetings, actions, campaigns) */}
+      <InfoBanner
+        banner={eventsData?.banner || null}
+        onOpenEvents={() => setEventsModalOpen(true)}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 pb-28 relative z-10" style={{ paddingBottom: '96px' }}>
@@ -805,7 +885,17 @@ export default function App() {
           setSettingsOpen(false);
           setActiveTab('simulateur');
         }}
+        onOpenEvents={() => {
+          setSettingsOpen(false);
+          setEventsModalOpen(true);
+        }}
         currentVersion={APP_CURRENT_VERSION}
+        fontSizePreference={fontSizePreference}
+        onFontSizeChange={(pref) => {
+          setFontSizePreference(pref);
+          saveFontSizePreference(pref);
+          applyFontSize(pref);
+        }}
       />
 
       {/* Dedicated 6 Parties Selection Modal */}
@@ -884,6 +974,32 @@ export default function App() {
         isOpen={updateModalOpen}
         onClose={() => setUpdateModalOpen(false)}
         currentVersion={APP_CURRENT_VERSION}
+      />
+
+      {/* Dedicated Events & Action Agenda Modal */}
+      <EventsModal
+        isOpen={eventsModalOpen}
+        onClose={() => setEventsModalOpen(false)}
+        events={eventsData?.events || []}
+        onOpenAdmin={() => {
+          setEventsModalOpen(false);
+          setAdminEventsModalOpen(true);
+        }}
+      />
+
+      {/* Dedicated Admin / Organizer Dashboard Modal */}
+      <AdminEventsModal
+        isOpen={adminEventsModalOpen}
+        onClose={() => setAdminEventsModalOpen(false)}
+        eventsData={
+          eventsData || {
+            banner: { enabled: false, type: 'info', message: '' },
+            events: []
+          }
+        }
+        onUpdateEventsData={newData => {
+          setEventsData(newData);
+        }}
       />
 
       {/* Bottom Frosted Stitch Navigation Bar */}

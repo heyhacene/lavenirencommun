@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Section, Profile } from '../types/programme';
+import { tts } from '../services/tts';
 import {
   IconClose,
   IconCheck,
@@ -7,6 +8,8 @@ import {
   IconBell,
   IconStar,
   IconArrowLeft,
+  IconVolume,
+  IconStop,
   renderProfileIcon,
   getProfileColor
 } from './Icons';
@@ -29,10 +32,22 @@ export const ModalFicheIntegrale = ({
   onRandomFiche
 }: ModalFicheIntegraleProps) => {
   const [copied, setCopied] = useState(false);
+  const [playingMeasureIdx, setPlayingMeasureIdx] = useState<number | null>(null);
+  const [isSpeakingAll, setIsSpeakingAll] = useState(false);
+  const [copiedMeasureIdx, setCopiedMeasureIdx] = useState<number | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  // Always reset scroll to top when opening or switching section
+  // Stop any ongoing TTS audio when modal unmounts or section changes
   useEffect(() => {
+    return () => {
+      tts.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    tts.stop();
+    setPlayingMeasureIdx(null);
+    setIsSpeakingAll(false);
     if (bodyRef.current) {
       bodyRef.current.scrollTop = 0;
     }
@@ -41,6 +56,69 @@ export const ModalFicheIntegrale = ({
   if (!section) return null;
 
   const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+  const handleToggleSpeakMeasure = (idx: number, text: string) => {
+    if (playingMeasureIdx === idx) {
+      tts.stop();
+      setPlayingMeasureIdx(null);
+      return;
+    }
+    setIsSpeakingAll(false);
+    setPlayingMeasureIdx(idx);
+    tts.speak(
+      `Mesure ${idx + 1} : ${text}`,
+      () => setPlayingMeasureIdx(idx),
+      () => setPlayingMeasureIdx(null),
+      () => setPlayingMeasureIdx(null)
+    );
+  };
+
+  const handleToggleSpeakAll = () => {
+    if (isSpeakingAll) {
+      tts.stop();
+      setIsSpeakingAll(false);
+      return;
+    }
+    setPlayingMeasureIdx(null);
+    setIsSpeakingAll(true);
+
+    const fullText = `Fiche : ${section.title}. Mesure clé : ${section.mesureCle}. ` +
+      section.mesures.map((m, i) => `Mesure ${i + 1} : ${m}`).join('. ');
+
+    tts.speak(
+      fullText,
+      () => setIsSpeakingAll(true),
+      () => setIsSpeakingAll(false),
+      () => setIsSpeakingAll(false)
+    );
+  };
+
+  const handleShareMeasure = async (idx: number, text: string) => {
+    const shareText = `📌 L'Avenir en commun — Élection 2027\nMesure n°${idx + 1} : « ${text} »\n\n(Fiche officielle : ${section.title})\nDécouvrez tout le programme : https://heyhacene.github.io/lavenirencommun/`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Mesure ${idx + 1} — ${section.title}`,
+          text: shareText,
+          url: 'https://heyhacene.github.io/lavenirencommun/'
+        });
+        return;
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setCopiedMeasureIdx(idx);
+        setTimeout(() => setCopiedMeasureIdx(null), 2500);
+      } catch (e) {
+        // Fallback
+      }
+    }
+  };
 
   const handleShare = async () => {
     const textToShare = `${section.title}\n\n★ MESURE CLÉ :\n${section.mesureCle}\n\nProgramme officiel L'Avenir en commun 2027 (Jean-Luc Mélenchon)`;
@@ -150,11 +228,27 @@ export const ModalFicheIntegrale = ({
 
           {/* Full measures list */}
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <h4 className="text-xs font-black uppercase tracking-wider text-purple-300">
                 Version intégrale des mesures ({section.mesures.length})
               </h4>
-              <span className="text-[11px] text-slate-400 font-medium">Texte officiel 2027</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleToggleSpeakAll}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+                    isSpeakingAll
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 animate-pulse'
+                      : 'bg-purple-900/40 text-purple-200 border-purple-700/40 hover:text-white hover:bg-purple-800/50'
+                  }`}
+                  style={{ touchAction: 'manipulation' }}
+                  title="Écouter toute la fiche en synthèse vocale"
+                >
+                  {isSpeakingAll ? <IconStop size={14} className="text-amber-400" /> : <IconVolume size={14} />}
+                  <span>{isSpeakingAll ? 'Arrêter audio' : 'Écouter la fiche'}</span>
+                </button>
+                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">Texte officiel 2027</span>
+              </div>
             </div>
 
             {section.mesures.length === 0 ? (
@@ -163,22 +257,64 @@ export const ModalFicheIntegrale = ({
               </p>
             ) : (
               <ol className="space-y-3">
-                {section.mesures.map((m, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-950/30 border border-purple-800/30 hover:border-purple-700/60 transition-colors text-sm leading-relaxed"
-                  >
-                    <span
-                      className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md select-none"
-                      style={{ width: '28px', height: '28px', minWidth: '28px', minHeight: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '9999px', flexShrink: 0 }}
+                {section.mesures.map((m, idx) => {
+                  const isSpeakingThis = playingMeasureIdx === idx;
+                  const isCopiedThis = copiedMeasureIdx === idx;
+
+                  return (
+                    <li
+                      key={idx}
+                      className={`flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl transition-all border text-sm leading-relaxed ${
+                        isSpeakingThis
+                          ? 'bg-purple-900/50 border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)] ring-1 ring-purple-400/50'
+                          : 'bg-purple-950/30 border-purple-800/30 hover:border-purple-700/60'
+                      }`}
                     >
-                      {idx + 1}
-                    </span>
-                    <span className="text-slate-100 font-medium">
-                      {m}
-                    </span>
-                  </li>
-                ))}
+                      <span
+                        className="flex-shrink-0 w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] aspect-square rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xs flex items-center justify-center mt-0.5 shadow-md select-none"
+                        style={{ width: '28px', height: '28px', minWidth: '28px', minHeight: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '9999px', flexShrink: 0 }}
+                      >
+                        {idx + 1}
+                      </span>
+
+                      <span className="text-slate-100 font-medium flex-1 min-w-0">
+                        {m}
+                      </span>
+
+                      <div className="flex items-center gap-1 flex-shrink-0 pt-0.5">
+                        {/* Audio TTS button */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSpeakMeasure(idx, m)}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            isSpeakingThis
+                              ? 'bg-amber-500 text-white shadow-md animate-pulse'
+                              : 'text-purple-400 hover:text-white hover:bg-purple-800/40'
+                          }`}
+                          style={{ touchAction: 'manipulation' }}
+                          title={isSpeakingThis ? 'Arrêter la lecture' : 'Écouter cette mesure'}
+                        >
+                          {isSpeakingThis ? <IconStop size={15} /> : <IconVolume size={15} />}
+                        </button>
+
+                        {/* Share individual measure button */}
+                        <button
+                          type="button"
+                          onClick={() => handleShareMeasure(idx, m)}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            isCopiedThis
+                              ? 'bg-emerald-600 text-white shadow-md'
+                              : 'text-purple-400 hover:text-white hover:bg-purple-800/40'
+                          }`}
+                          style={{ touchAction: 'manipulation' }}
+                          title="Partager cette mesure individuellement"
+                        >
+                          {isCopiedThis ? <IconCheck size={15} /> : <IconShare size={15} />}
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ol>
             )}
           </div>

@@ -26,7 +26,7 @@ interface ReleaseInfo {
 export const UpdateModal = ({
   isOpen,
   onClose,
-  currentVersion = 'v1.0.29'
+  currentVersion = 'v1.0.30'
 }: UpdateModalProps) => {
   const [loading, setLoading] = useState(false);
   const [release, setRelease] = useState<ReleaseInfo | null>(null);

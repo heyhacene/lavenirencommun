@@ -3,6 +3,20 @@
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --font-scale: 1;
+}
+
+[data-font-scale="large"] {
+  --font-scale: 1.15;
+}
+
+[data-font-scale="xlarge"] {
+  --font-scale: 1.30;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale, 1));
+  transition: font-size 0.2s ease;
 }
 
 * {
