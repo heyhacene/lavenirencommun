@@ -1,7 +1,7 @@
 {
   "name": "lavenirencommun",
   "private": true,
-  "version": "1.0.30",
+  "version": "1.0.32",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/text-to-speech": "^8.0.2",
     "@capacitor/android": "^8.5.3",
     "@capacitor/app": "^8.0.0",
     "@capacitor/cli": "^8.5.3",
