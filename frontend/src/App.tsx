@@ -39,7 +39,8 @@ import {
   applyFontSize,
   type FontSizePreference
 } from './services/accessibility';
-import { loadEventsData, type EventsData } from './services/events';
+import { loadEventsData } from './services/events';
+import type { EventsData } from './types/events';
 import {
   IconSearch,
   IconBell,

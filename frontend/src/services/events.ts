@@ -1,4 +1,5 @@
 import type { EventsData, AppEvent, BroadcastBanner } from '../types/events';
+export type { EventsData, AppEvent, BroadcastBanner } from '../types/events';
 
 const LOCAL_EVENTS_KEY = 'lfi_custom_events_data';
 const ADMIN_PASSCODE_KEY = 'lfi_admin_passcode';
