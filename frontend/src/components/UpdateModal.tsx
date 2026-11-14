@@ -26,7 +26,7 @@ interface ReleaseInfo {
 export const UpdateModal = ({
   isOpen,
   onClose,
-  currentVersion = 'v1.0.36'
+  currentVersion = 'v1.0.37'
 }: UpdateModalProps) => {
   const [loading, setLoading] = useState(false);
   const [release, setRelease] = useState<ReleaseInfo | null>(null);
@@ -155,7 +155,7 @@ export const UpdateModal = ({
                 <span>Votre application est à jour !</span>
               </div>
               <p className="text-xs text-emerald-200/80 leading-relaxed">
-                Vous disposez de la toute dernière version ({release.tag_name}) avec l'ensemble des 111 fiches thématiques, les 5 plans sectoriels et le chiffrage budgétaire actualisé.
+                Vous disposez de la toute dernière version ({release.tag_name}) avec l'ensemble des 111 fiches thématiques, les 6 plans sectoriels (dont les plans d'investissement BTP, Auto, Textile) et le chiffrage budgétaire actualisé.
               </p>
             </div>
           )}

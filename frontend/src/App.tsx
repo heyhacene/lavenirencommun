@@ -55,7 +55,7 @@ import {
   renderProfileIcon
 } from './components/Icons';
 
-const APP_CURRENT_VERSION = 'v1.0.36';
+const APP_CURRENT_VERSION = 'v1.0.37';
 
 export const PARTY_TITLES: Record<number, string> = {
   1: 'Pour une bifurcation écologique et sociale',
@@ -1030,7 +1030,7 @@ export default function App() {
           <span className="text-[10px] tracking-wide font-bold">Fiches</span>
         </button>
 
-        {/* Tab 2: 5 Plans */}
+        {/* Tab 2: Plans */}
         <button
           onClick={() => setActiveTab('plans')}
           className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
@@ -1040,7 +1040,7 @@ export default function App() {
           }`}
         >
           <IconPlans size={20} className={activeTab === 'plans' ? 'text-amber-400' : ''} />
-          <span className="text-[10px] tracking-wide font-bold">5 Plans</span>
+          <span className="text-[10px] tracking-wide font-bold">Plans</span>
         </button>
 
         {/* Tab 3: Simulateur Impôts & Héritage */}
