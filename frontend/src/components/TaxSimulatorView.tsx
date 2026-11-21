@@ -328,6 +328,23 @@ export const TaxSimulatorView: React.FC<TaxSimulatorViewProps> = ({ onOpenShare 
               )}
             </div>
 
+            {/* Précision enfants et avantage familial */}
+            {children > 0 && incomeResult.savingsFromChildren !== undefined && incomeResult.savingsFromChildren > 0 && (
+              <div className="mt-4 p-3.5 rounded-2xl bg-purple-900/40 border border-purple-500/30 text-xs space-y-1">
+                <div className="font-bold text-amber-300 flex items-center gap-1.5">
+                  <span>👶</span>
+                  <span>Avantage familial ({children} enfant{children > 1 ? 's' : ''} à charge) :</span>
+                </div>
+                <p className="text-purple-200 leading-relaxed text-[11px]">
+                  Pour un même salaire, une personne sans enfant paierait{' '}
+                  <strong className="text-white font-mono">{formatCurrency(incomeResult.singleNoChildLfiTotal || 0)}</strong>{' '}
+                  d'impôt total avec LFI. Grâce à vos enfants et au quotient familial, vous ne payez que{' '}
+                  <strong className="text-emerald-400 font-mono">{formatCurrency(incomeResult.lfi.total)}</strong>{' '}
+                  (soit <strong className="text-emerald-300">-{formatCurrency(incomeResult.savingsFromChildren)}</strong> de prélèvement en moins par an !).
+                </p>
+              </div>
+            )}
+
             {/* Jauge Percentile INSEE */}
             <div className="mt-5 p-3.5 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between gap-3 text-xs">
               <span className="text-purple-300">
@@ -373,6 +390,21 @@ export const TaxSimulatorView: React.FC<TaxSimulatorViewProps> = ({ onOpenShare 
                     {formatCurrency(incomeResult.lfi.csg)}
                   </span>
                 </div>
+
+                {/* Ligne 2bis : Soutien familial et crédit d'impôt par enfant */}
+                {incomeResult.lfi.childCredit !== undefined && incomeResult.lfi.childCredit > 0 && (
+                  <div className="grid grid-cols-3 gap-2 items-center text-center text-[11px] sm:text-xs">
+                    <span className="text-left font-medium text-amber-300">
+                      👶 Soutien &amp; crédit d'impôt familial LFI
+                    </span>
+                    <span className="font-mono text-slate-400">
+                      -
+                    </span>
+                    <span className="font-mono font-bold text-emerald-400">
+                      -{formatCurrency(incomeResult.lfi.childCredit)}
+                    </span>
+                  </div>
+                )}
 
                 {/* Ligne 3 : Total */}
                 <div className="grid grid-cols-3 gap-2 items-center text-center pt-2.5 border-t border-white/15 font-bold">

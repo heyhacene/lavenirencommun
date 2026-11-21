@@ -9,6 +9,7 @@ export interface IncomeTaxResult {
   lfi: {
     ir: number;
     csg: number;
+    childCredit?: number;
     total: number;
   };
   gain: number;
@@ -16,6 +17,8 @@ export interface IncomeTaxResult {
   percentile: number;
   effectiveRateCurrent: number;
   effectiveRateLfi: number;
+  singleNoChildLfiTotal?: number;
+  savingsFromChildren?: number;
 }
 
 export interface HeritageTaxResult {
@@ -206,43 +209,59 @@ export function computeIncomeTaxes(
     .map(lfiCsg)
     .reduce((a, b) => a + b, 0);
 
-  const calcIr = (taxFn: (val: number) => number) => {
-    const rawTax = computeTaxWithQuotient(abattement10(totalNetAfterCsg), isCouple, nbChildren, taxFn);
+  const calcIrForChildren = (childrenCount: number, taxFn: (val: number) => number) => {
+    const rawTax = computeTaxWithQuotient(abattement10(totalNetAfterCsg), isCouple, childrenCount, taxFn);
     const afterDecote = rawTax - applyDecote(rawTax, isCouple);
     return afterDecote >= 61 ? afterDecote : 0;
   };
 
+  const calcIr = (taxFn: (val: number) => number) => calcIrForChildren(nbChildren, taxFn);
+
   let currentIr = calcIr(currentIrBareme);
   let lfiIr = calcIr(lfiIrBareme);
 
-  // Garantie LFI : pas de hausse d'impôt sous 4 000 €/mois (célibataire) et 5 500 €/mois (couple)
+  // 1. Règle cardinale LFI de protection du pouvoir d'achat :
+  // Sous 4 000 €/mois (célibataire) et 5 500 €/mois (couple), l'impôt sur le revenu LFI
+  // ne peut JAMAIS excéder l'impôt sur le revenu actuel.
   const totalNet = annualSalariesNet.reduce((a, b) => a + b, 0);
   const maxNet = Math.max(...annualSalariesNet);
-  const diffGain = currentIr - lfiIr + currentTotalCsg - lfiTotalCsg;
+  const isProtectedIncome = (!isCouple && totalNet <= 48000) || (isCouple && totalNet <= 66000);
 
-  const shouldGuaranteeGain = diffGain < 0 && (
-    (!isCouple && totalNet <= 48000) ||
-    (isCouple && totalNet <= 60000) ||
-    (isCouple && maxNet <= 48000)
-  );
-  const isSuperRich = diffGain > 0 && totalNet > 66000 && maxNet > 48000;
-
-  if (shouldGuaranteeGain) {
-    const baseline = currentIr + currentTotalCsg - lfiTotalCsg;
-    lfiIr = baseline > 0 ? 0.95 * baseline : 1.05 * baseline;
-  } else if (isSuperRich) {
-    lfiIr += 2 * diffGain;
+  if (isProtectedIncome) {
+    if (lfiIr > currentIr) {
+      lfiIr = currentIr;
+    }
   }
 
-  if (!isCouple && nbChildren > 2 && annualSalariesNet[0] > 48000 && annualSalariesNet[0] < 60000) {
-    const base = currentIr + currentTotalCsg - lfiTotalCsg;
-    const t = (annualSalariesNet[0] / 12 - 4000) / 1000;
-    lfiIr = base + (lfiIr - base) * t;
+  // 2. Soutien et crédit d'impôt par enfant (Programme L'Avenir en commun / NFP) :
+  // Pour les foyers modestes et moyens, bonification de 150 € / an par enfant à charge
+  let childCredit = 0;
+  if (nbChildren > 0 && totalNet <= 66000) {
+    childCredit = nbChildren * 150;
+  }
+
+  // 3. Contribution des très hauts revenus (> 66 000 €/an et max > 48 000 €/an)
+  const isSuperRich = totalNet > 66000 && maxNet > 48000;
+  if (isSuperRich && lfiIr < currentIr) {
+    lfiIr += (currentIr - lfiIr) * 0.5;
   }
 
   const currentTotal = currentIr + currentTotalCsg;
-  const lfiTotal = lfiIr + lfiTotalCsg;
+  const lfiTotal = Math.max(0, lfiIr + lfiTotalCsg - childCredit);
   const gain = currentTotal - lfiTotal;
+
+  // Calcul comparatif : ce que paierait un célibataire sans enfant avec le même salaire
+  let singleNoChildLfiTotal = lfiTotal;
+  let savingsFromChildren = 0;
+  if (nbChildren > 0) {
+    const singleNoChildCurrentIr = calcIrForChildren(0, currentIrBareme);
+    let singleNoChildLfiIr = calcIrForChildren(0, lfiIrBareme);
+    if (isProtectedIncome && singleNoChildLfiIr > singleNoChildCurrentIr) {
+      singleNoChildLfiIr = singleNoChildCurrentIr;
+    }
+    singleNoChildLfiTotal = Math.round(singleNoChildLfiIr + lfiTotalCsg);
+    savingsFromChildren = Math.max(0, singleNoChildLfiTotal - Math.round(lfiTotal));
+  }
 
   const totalGrossIncome = grossSalaries.reduce((a, b) => a + b, 0);
   const effectiveRateCurrent = totalGrossIncome > 0 ? (currentTotal / totalGrossIncome) * 100 : 0;
@@ -260,13 +279,16 @@ export function computeIncomeTaxes(
     lfi: {
       ir: Math.round(lfiIr),
       csg: Math.round(lfiTotalCsg),
+      childCredit: Math.round(childCredit),
       total: Math.round(lfiTotal)
     },
     gain: Math.round(gain),
     gainMonthly: Math.round(gain / 12),
     percentile,
     effectiveRateCurrent: Math.round(effectiveRateCurrent * 10) / 10,
-    effectiveRateLfi: Math.round(effectiveRateLfi * 10) / 10
+    effectiveRateLfi: Math.round(effectiveRateLfi * 10) / 10,
+    singleNoChildLfiTotal,
+    savingsFromChildren
   };
 }
 
